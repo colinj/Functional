@@ -7,18 +7,21 @@ uses
   Generics.Collections;
 
 type
-//  TValueState = (vsStart, vsSomething, vsNothing, vsStop);
+  TValueState = (vsStart, vsSomething, vsNothing, vsStop);
 
-  TOptional<T> = record
+  TValue<T> = record
     FValue: T;
-    FIsSomething: Boolean;
+    FState: TValueState;
   public
-    constructor Create(const aValue: T; const aValidFlag: Boolean = True);
+    class operator Implicit(const aValue: T): TValue<T>;
+    class function Nothing: TValue<T>; static;
+    class function Start: TValue<T>; static;
+    class function Stop: TValue<T>; static;
     property Value: T read FValue;
-    property IsSomething: Boolean read FIsSomething;
+    property State: TValueState read FState;
   end;
 
-  TValueFunc<T, U> = reference to function(X: TOptional<T>): TOptional<U>;
+  TValueFunc<T, U> = reference to function(X: TValue<T>): TValue<U>;
 
   TSeq<T, U> = record
   private
@@ -45,12 +48,27 @@ type
 
 implementation
 
-{ TOptional<T> }
+{ TValue<T> }
 
-constructor TOptional<T>.Create(const aValue: T; const aValidFlag: Boolean);
+class operator TValue<T>.Implicit(const aValue: T): TValue<T>;
 begin
-  FValue := aValue;
-  FIsSomething := aValidFlag;
+  Result.FValue := aValue;
+  Result.FState := vsSomething;
+end;
+
+class function TValue<T>.Nothing: TValue<T>;
+begin
+  Result.FState := vsNothing;
+end;
+
+class function TValue<T>.Start: TValue<T>;
+begin
+  Result.FState := vsStart;
+end;
+
+class function TValue<T>.Stop: TValue<T>;
+begin
+  Result.FState := vsStop;
 end;
 
 { TSeq<T, U> }
@@ -64,13 +82,16 @@ end;
 procedure TSeq<T, U>.DoIt(const aAction: TProc<U>);
 var
   Item: T;
-  R: TOptional<U>;
+  R: TValue<U>;
 begin
+  FFunc(TValue<T>.Start);
   for Item in FEnumerable do
   begin
-    R := FFunc(TOptional<T>.Create(Item));
-    if R.IsSomething then
-      aAction(R.Value);
+    R := FFunc(TValue<T>(Item));
+    case R.State of
+      vsSomething: aAction(R.Value);
+      vsStop: Break;
+    end;
   end;
 end;
 
@@ -83,15 +104,13 @@ end;
 procedure TSeq<T, U>.MakeFilter(const aOldFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>);
 begin
   FFunc :=
-    function (X: TOptional<T>): TOptional<U>
+    function (X: TValue<T>): TValue<U>
     var
-      R: TOptional<U>;
+      R: TValue<U>;
     begin
-      R := aOldFunc(X);
-      if R.IsSomething then
-        Result := TOptional<U>.Create(R.Value, aPredicate(R.Value))
-      else
-        Result.FIsSomething := False;
+      Result := aOldFunc(X);
+      if (Result.State = vsSomething) and not aPredicate(Result.Value) then
+        Result.FState := vsNothing;
     end;
 end;
 
@@ -104,15 +123,15 @@ end;
 procedure TSeq<T, U>.MakeMap<OldU>(const aOldFunc: TValueFunc<T, OldU>; const aMapper: TFunc<OldU, U>);
 begin
   FFunc :=
-    function (X: TOptional<T>): TOptional<U>
+    function (X: TValue<T>): TValue<U>
     var
-      R: TOptional<OldU>;
+      R: TValue<OldU>;
     begin
       R := aOldFunc(X);
-      if R.IsSomething then
-        Result := TOptional<U>.Create(aMapper(R.Value))
+      if R.State = vsSomething then
+        Result := TValue<U>(aMapper(R.Value))
       else
-        Result.FIsSomething := False;
+        Result := TValue<U>.Nothing;
     end;
 end;
 
@@ -136,18 +155,21 @@ end;
 function TSeq<T>.Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
 begin
   Result := TSeq<T, T>.Create(FEnumerable,
-    function (X: TOptional<T>): TOptional<T>
+    function (X: TValue<T>): TValue<T>
     begin
-      Result := TOptional<T>.Create(X.Value, aPredicate(X.Value))
+      Result := TValue<T>(X.Value);
+      if not aPredicate(X.Value) then
+        Result.FState := vsNothing;
     end);
 end;
 
 function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
 begin
   Result := TSeq<T, TResult>.Create(FEnumerable,
-    function (X: TOptional<T>): TOptional<TResult>
+    function (X: TValue<T>): TValue<TResult>
     begin
-      Result := TOptional<TResult>.Create(aMapper(X.Value))
+      Result := TValue<TResult>(aMapper(X.Value));
+      Result.FState := vsSomething;
     end);
 end;
 

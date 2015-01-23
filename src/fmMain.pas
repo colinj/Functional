@@ -32,17 +32,16 @@ var
   R: TIntegerRange;
   I: TSeq<Integer>;
   I2: TSeq<Integer, Integer>;
-  I3: TSeq<Integer, string>;
 //  S: TList<string>;
 begin
-  R := TIntegerRange.Create(1, 255);
+  R := TIntegerRange.Create(1, 50);
   try
     I := TSeq<Integer>(R);
     I2 := TSeq<Integer>(R)
       .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
       .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
-      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
-      .Map<Integer>(function(X: Integer): Integer begin Result := X + 7 end);
+      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end);
+//      .Map<Integer>(function(X: Integer): Integer begin Result := X + 7 end);
 
     I2.DoIt(PrintNum);
 
