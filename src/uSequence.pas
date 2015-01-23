@@ -27,10 +27,6 @@ type
   private
     FFunc: TValueFunc<T, U>;
     FEnumerable: TEnumerable<T>;
-    procedure MakeFilter(const aOldFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>);
-    procedure MakeMap<OldU>(const aOldFunc: TValueFunc<T, OldU>; const aMapper: TFunc<OldU, U>);
-    procedure MakeTake(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
-    procedure MakeSkip(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
   public
     constructor Create(const aEnumerator: TEnumerable<T>; const aFunc: TValueFunc<T, U>);
     function Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
@@ -99,37 +95,48 @@ begin
   end;
 end;
 
-procedure TSeq<T, U>.MakeFilter(const aOldFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>);
+function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
+var
+  OldFunc: TValueFunc<T, U>;
 begin
-  FFunc :=
+  OldFunc := FFunc;
+
+  Result := TSeq<T, U>.Create(FEnumerable,
     function (X: TValue<T>): TValue<U>
     begin
-      Result := aOldFunc(X);
+      Result := OldFunc(X);
       if (Result.State = vsSomething) and not aPredicate(Result.Value) then
         Result.FState := vsNothing;
-    end;
+    end);
 end;
 
-procedure TSeq<T, U>.MakeMap<OldU>(const aOldFunc: TValueFunc<T, OldU>; const aMapper: TFunc<OldU, U>);
-begin
-  FFunc :=
-    function (X: TValue<T>): TValue<U>
-    var
-      R: TValue<OldU>;
-    begin
-      R := aOldFunc(X);
-      if R.State = vsSomething then
-        Result := TValue<U>(aMapper(R.Value))
-      else
-        Result := TValue<U>.Nothing;
-    end;
-end;
-
-procedure TSeq<T, U>.MakeTake(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
+function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
 var
+  OldFunc: TValueFunc<T, U>;
+begin
+  OldFunc := FFunc;
+
+  Result := TSeq<T, TResult>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<TResult>
+    var
+      R: TValue<U>;
+    begin
+      R := OldFunc(X);
+      if R.State = vsSomething then
+        Result := TValue<TResult>(aMapper(R.Value))
+      else
+        Result := TValue<TResult>.Nothing;
+    end);
+end;
+
+function TSeq<T, U>.Take(const aCount: Integer): TSeq<T, U>;
+var
+  OldFunc: TValueFunc<T, U>;
   Counter: Integer;
 begin
-  FFunc :=
+  OldFunc := FFunc;
+
+  Result := TSeq<T, U>.Create(FEnumerable,
     function (X: TValue<T>): TValue<U>
     begin
       if Counter = aCount then
@@ -138,22 +145,25 @@ begin
           Exit;
         end;
 
-      Result := aOldFunc(X);
+      Result := OldFunc(X);
       case Result.State of
         vsStart: Counter := 0;
         vsSomething: Inc(Counter);
       end;
-    end;
+    end);
 end;
 
-procedure TSeq<T, U>.MakeSkip(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
+function TSeq<T, U>.Skip(const aCount: Integer): TSeq<T, U>;
 var
+  OldFunc: TValueFunc<T, U>;
   Counter: Integer;
 begin
-  FFunc :=
+  OldFunc := FFunc;
+
+  Result := TSeq<T, U>.Create(FEnumerable,
     function (X: TValue<T>): TValue<U>
     begin
-      Result := aOldFunc(X);
+      Result := OldFunc(X);
       case Result.State of
         vsStart: Counter := 0;
         vsSomething:
@@ -163,31 +173,7 @@ begin
               Result := TValue<U>.Nothing;
           end;
       end;
-    end;
-end;
-
-function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeFilter(FFunc, aPredicate);
-end;
-
-function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeMap<U>(FFunc, aMapper);
-end;
-
-function TSeq<T, U>.Take(const aCount: Integer): TSeq<T, U>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeTake(FFunc, aCount);
-end;
-
-function TSeq<T, U>.Skip(const aCount: Integer): TSeq<T, U>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeSkip(FFunc, aCount);
+    end);
 end;
 
 { TSeq<T> }
