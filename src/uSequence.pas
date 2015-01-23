@@ -22,6 +22,7 @@ type
   end;
 
   TValueFunc<T, U> = reference to function(X: TValue<T>): TValue<U>;
+  TFoldFunc<T> = reference to function(Acc, X: T): T;
 
   TSeq<T, U> = record
   private
@@ -33,6 +34,7 @@ type
     function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, U>;
     function Skip(const aCount: Integer): TSeq<T, U>;
+    function Fold(const aFoldFunc: TFoldFunc<U>; const aInitVal: U): U;
     procedure DoIt(const aAction: TProc<U>);
   end;
 
@@ -93,6 +95,26 @@ begin
       vsStop: Break;
     end;
   end;
+end;
+
+function TSeq<T, U>.Fold(const aFoldFunc: TFoldFunc<U>; const aInitVal: U): U;
+var
+  Item: T;
+  R: TValue<U>;
+  Accumulator: U;
+begin
+  Accumulator := aInitVal;
+
+  FFunc(TValue<T>.Start);
+  for Item in FEnumerable do
+  begin
+    R := FFunc(TValue<T>(Item));
+    case R.State of
+      vsSomething: Accumulator := aFoldFunc(Accumulator, R.Value);
+      vsStop: Break;
+    end;
+  end;
+  Result := Accumulator;
 end;
 
 function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;

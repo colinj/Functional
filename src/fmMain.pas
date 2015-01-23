@@ -33,6 +33,7 @@ var
   I: TSeq<Integer>;
   I2: TSeq<Integer, Integer>;
 //  S: TList<string>;
+  J: Integer;
 begin
   R := TIntegerRange.Create(1, 50);
   try
@@ -47,6 +48,12 @@ begin
 
     I2.DoIt(PrintNum);
 
+    J := TSeq<Integer>(R)
+      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
+      .Take(5)
+      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
+
+    PrintNum(J);
 //    TSeq<Integer>(R)
 //      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
