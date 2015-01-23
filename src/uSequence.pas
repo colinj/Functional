@@ -45,6 +45,9 @@ type
     class operator Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
     function Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
+    function Take(const aCount: Integer): TSeq<T, T>;
+    function Skip(const aCount: Integer): TSeq<T, T>;
+    function Fold(const aFoldFunc: TFoldFunc<T>; const aInitVal: T): T;
     procedure DoIt(const aAction: TProc<T>);
   end;
 
@@ -226,6 +229,19 @@ begin
     end);
 end;
 
+function TSeq<T>.Fold(const aFoldFunc: TFoldFunc<T>; const aInitVal: T): T;
+var
+  Item: T;
+  Accumulator: T;
+begin
+  Result := aInitVal;
+
+  for Item in FEnumerable do
+  begin
+    Result := aFoldFunc(Result, Item);
+  end;
+end;
+
 function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
 begin
   Result := TSeq<T, TResult>.Create(FEnumerable,
@@ -238,6 +254,47 @@ begin
       end
       else
         Result.FState := X.State;
+    end);
+end;
+
+function TSeq<T>.Skip(const aCount: Integer): TSeq<T, T>;
+var
+  Counter: Integer;
+begin
+  Result := TSeq<T, T>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<T>
+    begin
+      Result := X;
+      case Result.State of
+        vsStart: Counter := 0;
+        vsSomething:
+          begin
+            Inc(Counter);
+            if Counter <= aCount then
+              Result := TValue<T>.Nothing;
+          end;
+      end;
+    end);
+end;
+
+function TSeq<T>.Take(const aCount: Integer): TSeq<T, T>;
+var
+  Counter: Integer;
+begin
+  Result := TSeq<T, T>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<T>
+    begin
+      if Counter = aCount then
+        begin
+          Result := TValue<T>.Stop;
+          Exit;
+        end;
+
+      Result := X;
+      case Result.State of
+        vsStart: Counter := 0;
+        vsSomething: Inc(Counter);
+      end;
     end);
 end;
 

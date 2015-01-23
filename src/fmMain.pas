@@ -35,23 +35,24 @@ var
 //  S: TList<string>;
   J: Integer;
 begin
-  R := TIntegerRange.Create(1, 50);
+  R := TIntegerRange.Create(1, 10);
   try
     I := TSeq<Integer>(R);
-    I2 := TSeq<Integer>(R)
-      .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
-      .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
-      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
-      .Skip(2)
-      .Take(2);
+//    I2 := TSeq<Integer>(R)
+//      .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
+//      .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
+//      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
+//      .Skip(2)
+//      .Take(2);
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X + 7 end);
 
-    I2.DoIt(PrintNum);
+//    I2.DoIt(PrintNum);
 
-    J := TSeq<Integer>(R)
-      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
-      .Take(5)
-      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
+//    J := TSeq<Integer>(R)
+//      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
+//      .Take(5)
+//      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
+    J := I.Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
 
     PrintNum(J);
 //    TSeq<Integer>(R)
