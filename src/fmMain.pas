@@ -40,16 +40,18 @@ begin
     I2 := TSeq<Integer>(R)
       .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
       .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
-      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end);
+      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
+      .Skip(2)
+      .Take(2);
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X + 7 end);
 
     I2.DoIt(PrintNum);
 
-    TSeq<Integer>(R)
-      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
-      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
-      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
-      .DoIt(procedure (S: string) begin Memo1.Lines.Add(S) end);
+//    TSeq<Integer>(R)
+//      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
+//      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
+//      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
+//      .DoIt(procedure (S: string) begin Memo1.Lines.Add(S) end);
   finally
     R.Free;
   end;

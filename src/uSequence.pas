@@ -29,10 +29,14 @@ type
     FEnumerable: TEnumerable<T>;
     procedure MakeFilter(const aOldFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>);
     procedure MakeMap<OldU>(const aOldFunc: TValueFunc<T, OldU>; const aMapper: TFunc<OldU, U>);
+    procedure MakeTake(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
+    procedure MakeSkip(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
   public
     constructor Create(const aEnumerator: TEnumerable<T>; const aFunc: TValueFunc<T, U>);
     function Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
+    function Take(const aCount: Integer): TSeq<T, U>;
+    function Skip(const aCount: Integer): TSeq<T, U>;
     procedure DoIt(const aAction: TProc<U>);
   end;
 
@@ -95,29 +99,15 @@ begin
   end;
 end;
 
-function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeFilter(FFunc, aPredicate);
-end;
-
 procedure TSeq<T, U>.MakeFilter(const aOldFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>);
 begin
   FFunc :=
     function (X: TValue<T>): TValue<U>
-    var
-      R: TValue<U>;
     begin
       Result := aOldFunc(X);
       if (Result.State = vsSomething) and not aPredicate(Result.Value) then
         Result.FState := vsNothing;
     end;
-end;
-
-function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
-begin
-  Result.FEnumerable := FEnumerable;
-  Result.MakeMap<U>(FFunc, aMapper);
 end;
 
 procedure TSeq<T, U>.MakeMap<OldU>(const aOldFunc: TValueFunc<T, OldU>; const aMapper: TFunc<OldU, U>);
@@ -133,6 +123,71 @@ begin
       else
         Result := TValue<U>.Nothing;
     end;
+end;
+
+procedure TSeq<T, U>.MakeTake(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
+var
+  Counter: Integer;
+begin
+  FFunc :=
+    function (X: TValue<T>): TValue<U>
+    begin
+      if Counter = aCount then
+        begin
+          Result := TValue<U>.Stop;
+          Exit;
+        end;
+
+      Result := aOldFunc(X);
+      case Result.State of
+        vsStart: Counter := 0;
+        vsSomething: Inc(Counter);
+      end;
+    end;
+end;
+
+procedure TSeq<T, U>.MakeSkip(const aOldFunc: TValueFunc<T, U>; const aCount: Integer);
+var
+  Counter: Integer;
+begin
+  FFunc :=
+    function (X: TValue<T>): TValue<U>
+    begin
+      Result := aOldFunc(X);
+      case Result.State of
+        vsStart: Counter := 0;
+        vsSomething:
+          begin
+            Inc(Counter);
+            if Counter <= aCount then
+              Result := TValue<U>.Nothing;
+          end;
+      end;
+    end;
+end;
+
+function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
+begin
+  Result.FEnumerable := FEnumerable;
+  Result.MakeFilter(FFunc, aPredicate);
+end;
+
+function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
+begin
+  Result.FEnumerable := FEnumerable;
+  Result.MakeMap<U>(FFunc, aMapper);
+end;
+
+function TSeq<T, U>.Take(const aCount: Integer): TSeq<T, U>;
+begin
+  Result.FEnumerable := FEnumerable;
+  Result.MakeTake(FFunc, aCount);
+end;
+
+function TSeq<T, U>.Skip(const aCount: Integer): TSeq<T, U>;
+begin
+  Result.FEnumerable := FEnumerable;
+  Result.MakeSkip(FFunc, aCount);
 end;
 
 { TSeq<T> }
@@ -157,8 +212,8 @@ begin
   Result := TSeq<T, T>.Create(FEnumerable,
     function (X: TValue<T>): TValue<T>
     begin
-      Result := TValue<T>(X.Value);
-      if not aPredicate(X.Value) then
+      Result := X;
+      if (Result.State = vsSomething) and not aPredicate(Result.Value) then
         Result.FState := vsNothing;
     end);
 end;
@@ -168,8 +223,13 @@ begin
   Result := TSeq<T, TResult>.Create(FEnumerable,
     function (X: TValue<T>): TValue<TResult>
     begin
-      Result := TValue<TResult>(aMapper(X.Value));
-      Result.FState := vsSomething;
+      if X.State = vsSomething then
+      begin
+        Result := TValue<TResult>(aMapper(X.Value));
+        Result.FState := vsSomething;
+      end
+      else
+        Result.FState := X.State;
     end);
 end;
 
