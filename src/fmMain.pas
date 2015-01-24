@@ -68,6 +68,23 @@ begin
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
 //      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
 //      .DoIt(procedure (S: string) begin Memo1.Lines.Add(S) end);
+
+  Memo1.Lines.Add('-----------------');
+  I
+    .TakeWhile(function(X: Integer): Boolean begin Result := X < 13 end)
+    .DoIt(PrintNum);
+
+  Memo1.Lines.Add('-----------------');
+  I
+    .SkipWhile(function(X: Integer): Boolean begin Result := X < 16 end)
+    .DoIt(PrintNum);
+
+  Memo1.Lines.Add('-----------------');
+  I
+    .SkipWhile(function(X: Integer): Boolean begin Result := X < 7 end)
+    .TakeWhile(function(X: Integer): Boolean begin Result := X < 16 end)
+    .DoIt(PrintNum);
+
   finally
     R.Free;
   end;

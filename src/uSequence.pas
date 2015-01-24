@@ -34,6 +34,8 @@ type
     function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, U>;
     function Skip(const aCount: Integer): TSeq<T, U>;
+    function TakeWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
+    function SkipWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<U>);
   end;
@@ -47,6 +49,8 @@ type
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, T>;
     function Skip(const aCount: Integer): TSeq<T, T>;
+    function TakeWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
+    function SkipWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<T>);
   end;
@@ -176,6 +180,21 @@ begin
     end);
 end;
 
+function TSeq<T, U>.TakeWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
+var
+  OldFunc: TValueFunc<T, U>;
+begin
+  OldFunc := FFunc;
+
+  Result := TSeq<T, U>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<U>
+    begin
+      Result := OldFunc(X);
+      if (Result.State = vsSomething) and not aPredicate(Result.Value) then
+        Result := TValue<U>.Stop;
+    end);
+end;
+
 function TSeq<T, U>.Skip(const aCount: Integer): TSeq<T, U>;
 var
   OldFunc: TValueFunc<T, U>;
@@ -194,6 +213,34 @@ begin
             Inc(Counter);
             if Counter <= aCount then
               Result := TValue<U>.Nothing;
+          end;
+      end;
+    end);
+end;
+
+function TSeq<T, U>.SkipWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
+var
+  OldFunc: TValueFunc<T, U>;
+  Skipping: Boolean;
+begin
+  OldFunc := FFunc;
+
+  Result := TSeq<T, U>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<U>
+    begin
+      Result := OldFunc(X);
+
+      case Result.State of
+        vsStart: Skipping := True;
+        vsSomething:
+          begin
+            if Skipping then
+            begin
+              if aPredicate(Result.Value) then
+                Result := TValue<U>.Nothing
+              else
+                Skipping := False;
+            end;
           end;
       end;
     end);
@@ -274,6 +321,31 @@ begin
     end);
 end;
 
+function TSeq<T>.SkipWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
+var
+  Skipping: Boolean;
+begin
+  Result := TSeq<T, T>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<T>
+    begin
+      Result := X;
+
+      case Result.State of
+        vsStart: Skipping := True;
+        vsSomething:
+          begin
+            if Skipping then
+            begin
+              if aPredicate(Result.Value) then
+                Result := TValue<T>.Nothing
+              else
+                Skipping := False;
+            end;
+          end;
+      end;
+    end);
+end;
+
 function TSeq<T>.Take(const aCount: Integer): TSeq<T, T>;
 var
   Counter: Integer;
@@ -292,6 +364,17 @@ begin
         vsStart: Counter := 0;
         vsSomething: Inc(Counter);
       end;
+    end);
+end;
+
+function TSeq<T>.TakeWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
+begin
+  Result := TSeq<T, T>.Create(FEnumerable,
+    function (X: TValue<T>): TValue<T>
+    begin
+      Result := X;
+      if (Result.State = vsSomething) and not aPredicate(Result.Value) then
+        Result := TValue<T>.Stop;
     end);
 end;
 
