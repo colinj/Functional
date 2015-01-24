@@ -34,8 +34,9 @@ var
   I2: TSeq<Integer, Integer>;
 //  S: TList<string>;
   J: Integer;
+  S: string;
 begin
-  R := TIntegerRange.Create(1, 10);
+  R := TIntegerRange.Create(1, 20);
   try
     I := TSeq<Integer>(R);
 //    I2 := TSeq<Integer>(R)
@@ -52,9 +53,16 @@ begin
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
 //      .Take(5)
 //      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
-    J := I.Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
-
+    J := I.Fold<Integer>(function(X, Acc: Integer): Integer begin Result := Acc + X end, 0);
     PrintNum(J);
+    S := I.Skip(10).Take(6)
+          .Fold<string>(function(X: Integer; Acc: string): string
+                        begin
+                          if Acc <> '' then
+                            Acc := Acc + ',';
+                          Result := Acc + IntToStr(X)
+                        end, '');
+    Memo1.Lines.Add(S);
 //    TSeq<Integer>(R)
 //      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)

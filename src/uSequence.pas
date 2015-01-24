@@ -22,7 +22,7 @@ type
   end;
 
   TValueFunc<T, U> = reference to function(X: TValue<T>): TValue<U>;
-  TFoldFunc<T> = reference to function(Acc, X: T): T;
+  TFoldFunc<T, U> = reference to function(X: T; Acc: U): U;
 
   TSeq<T, U> = record
   private
@@ -34,7 +34,7 @@ type
     function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, U>;
     function Skip(const aCount: Integer): TSeq<T, U>;
-    function Fold(const aFoldFunc: TFoldFunc<U>; const aInitVal: U): U;
+    function Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<U>);
   end;
 
@@ -47,7 +47,7 @@ type
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, T>;
     function Skip(const aCount: Integer): TSeq<T, T>;
-    function Fold(const aFoldFunc: TFoldFunc<T>; const aInitVal: T): T;
+    function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<T>);
   end;
 
@@ -100,24 +100,22 @@ begin
   end;
 end;
 
-function TSeq<T, U>.Fold(const aFoldFunc: TFoldFunc<U>; const aInitVal: U): U;
+function TSeq<T, U>.Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
 var
   Item: T;
   R: TValue<U>;
-  Accumulator: U;
 begin
-  Accumulator := aInitVal;
+  Result := aInitVal;
 
   FFunc(TValue<T>.Start);
   for Item in FEnumerable do
   begin
     R := FFunc(TValue<T>(Item));
     case R.State of
-      vsSomething: Accumulator := aFoldFunc(Accumulator, R.Value);
+      vsSomething: Result := aFoldFunc(R.Value, Result);
       vsStop: Break;
     end;
   end;
-  Result := Accumulator;
 end;
 
 function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
@@ -229,16 +227,15 @@ begin
     end);
 end;
 
-function TSeq<T>.Fold(const aFoldFunc: TFoldFunc<T>; const aInitVal: T): T;
+function TSeq<T>.Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
 var
   Item: T;
-  Accumulator: T;
 begin
   Result := aInitVal;
 
   for Item in FEnumerable do
   begin
-    Result := aFoldFunc(Result, Item);
+    Result := aFoldFunc(Item, Result);
   end;
 end;
 
