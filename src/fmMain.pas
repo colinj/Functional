@@ -98,23 +98,38 @@ end;
 
 procedure TForm6.Button2Click(Sender: TObject);
 var
+  C: Char;
   S: string;
   I: TSeq<Char>;
   CA: array[0..10] of Char;
+  CA2: TArray<Char>;
   CL: TList<Char>;
+  J: Integer;
 begin
   S := 'Hello, World!';
 //  SetLength(CA, Length(S));
-  StrLCopy(PChar(@CA[0]), PChar(S), Length(CA));
+//  StrLCopy(PChar(@CA[0]), PChar(S), Length(CA));
 
-  CL := TList<Char>.Create;
-  try
-    CL.AddRange(CA);
-    I := TSeq<Char>.From(CL);
-    I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
-  finally
-    CL.Free;
-  end;
+//  CL := TList<Char>.Create;
+//  try
+//    CL.AddRange(CA);
+//    I := TSeq<Char>.From(CL);
+//    I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+//  finally
+//    CL.Free;
+//  end;
+
+  SetLength(CA2, Length(S));
+  for J := 1 to Length(S) do
+    CA2[J - 1] := S[J];
+
+  I := TSeq<Char>.From(CA2);
+  I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+
+  I := TSeqString.From(S);
+  I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+
+
 end;
 
 procedure TForm6.Button3Click(Sender: TObject);

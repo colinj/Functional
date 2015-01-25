@@ -46,7 +46,8 @@ type
     FIterate: TIteratorProc<T>;
   public
 //    class operator Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
-    class function From(aEnumerable: TEnumerable<T>): TSeq<T>; static;
+    class function From(aEnumerable: TEnumerable<T>): TSeq<T>; overload; static;
+    class function From(const aArray: TArray<T>): TSeq<T>; overload; static;
     function Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, T>;
@@ -56,15 +57,12 @@ type
     function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<T>);
   end;
-{
-  TStringEnumerable = class(TEnumerable<Char>)
-  private
-    FStringVal: string;
+
+  TSeqString = record
   public
-    class operator Implicit(const aString: string): TStringEnumerable;
-    function
+    class function From(const aString: string): TSeq<Char>; static;
   end;
-  }
+
 implementation
 
 { TValue<T> }
@@ -324,6 +322,19 @@ begin
   Result := Accumulator;
 end;
 
+class function TSeq<T>.From(const aArray: TArray<T>): TSeq<T>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aArray do
+        if not P(Item) then
+          Break;
+    end;
+end;
+
 class function TSeq<T>.From(aEnumerable: TEnumerable<T>): TSeq<T>;
 begin
   Result.FIterate :=
@@ -427,6 +438,21 @@ begin
       if (Result.State = vsSomething) and not aPredicate(Result.Value) then
         Result := TValue<T>.Stop;
     end);
+end;
+
+{ TSeqString }
+
+class function TSeqString.From(const aString: string): TSeq<Char>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<Char>)
+    var
+      Item: Char;
+    begin
+      for Item in aString do
+        if not P(Item) then
+          Break;
+    end;
 end;
 
 end.
