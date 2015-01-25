@@ -54,7 +54,15 @@ type
     function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
     procedure DoIt(const aAction: TProc<T>);
   end;
-
+{
+  TStringEnumerable = class(TEnumerable<Char>)
+  private
+    FStringVal: string;
+  public
+    class operator Implicit(const aString: string): TStringEnumerable;
+    function
+  end;
+  }
 implementation
 
 { TValue<T> }

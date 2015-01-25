@@ -11,10 +11,13 @@ type
     Memo1: TMemo;
     Button1: TButton;
     Button2: TButton;
+    Button3: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
   private
     procedure PrintNum(X: Integer);
+    function DoAction(X: Integer): Boolean;
   end;
 
 var
@@ -112,6 +115,42 @@ begin
   finally
     CL.Free;
   end;
+end;
+
+procedure TForm6.Button3Click(Sender: TObject);
+var
+  Acc: Integer;
+  Adder: TPredicate<Integer>;
+
+  procedure Iterate(P: TPredicate<Integer>);
+  var
+    I: Integer;
+  begin
+    for I := 1 to 100 do
+      if not P(I) then
+        Break;
+  end;
+
+begin
+  Acc := 0;
+
+  Adder :=
+    function (X: Integer): Boolean
+    begin
+      Acc := Acc + X;
+      Result := True;
+    end;
+
+  Iterate(DoAction);
+  Iterate(Adder);
+  Memo1.Lines.Add(IntToStr(Acc));
+
+end;
+
+function TForm6.DoAction(X: Integer): Boolean;
+begin
+  Memo1.Lines.Add(IntToStr(X));
+  Result := x < 11;
 end;
 
 procedure TForm6.PrintNum(X: Integer);
