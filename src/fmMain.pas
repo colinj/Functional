@@ -44,7 +44,7 @@ var
 begin
   R := TIntegerRange.Create(1, 20);
   try
-    I := TSeq<Integer>(R);
+    I := TSeq<Integer>.From(R);
 //    I2 := TSeq<Integer>(R)
 //      .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
@@ -110,7 +110,7 @@ begin
   CL := TList<Char>.Create;
   try
     CL.AddRange(CA);
-    I := TSeq<Char>(CL);
+    I := TSeq<Char>.From(CL);
     I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
   finally
     CL.Free;

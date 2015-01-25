@@ -21,15 +21,16 @@ type
     property State: TValueState read FState;
   end;
 
-  TValueFunc<T, U> = reference to function(X: TValue<T>): TValue<U>;
-  TFoldFunc<T, U> = reference to function(X: T; Acc: U): U;
+  TValueFunc<T, U> = reference to function (X: TValue<T>): TValue<U>;
+  TFoldFunc<T, U> = reference to function (X: T; Acc: U): U;
+  TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
 
   TSeq<T, U> = record
   private
     FFunc: TValueFunc<T, U>;
-    FEnumerable: TEnumerable<T>;
+    FIterate: TIteratorProc<T>;
   public
-    constructor Create(const aEnumerator: TEnumerable<T>; const aFunc: TValueFunc<T, U>);
+    constructor Create(const aIterator: TIteratorProc<T>; const aFunc: TValueFunc<T, U>);
     function Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, U>;
@@ -42,9 +43,10 @@ type
 
   TSeq<T> = record
   private
-    FEnumerable: TEnumerable<T>;
+    FIterate: TIteratorProc<T>;
   public
-    class operator Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
+//    class operator Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
+    class function From(aEnumerable: TEnumerable<T>): TSeq<T>; static;
     function Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, T>;
@@ -90,44 +92,62 @@ end;
 
 { TSeq<T, U> }
 
-constructor TSeq<T, U>.Create(const aEnumerator: TEnumerable<T>; const aFunc: TValueFunc<T, U>);
+constructor TSeq<T, U>.Create(const aIterator: TIteratorProc<T>; const aFunc: TValueFunc<T, U>);
 begin
-  FEnumerable := aEnumerator;
+  FIterate := aIterator;
   FFunc := aFunc;
 end;
 
 procedure TSeq<T, U>.DoIt(const aAction: TProc<U>);
 var
-  Item: T;
-  R: TValue<U>;
+  OldFunc: TValueFunc<T, U>;
+  Action: TPredicate<T>;
 begin
-  FFunc(TValue<T>.Start);
-  for Item in FEnumerable do
-  begin
-    R := FFunc(TValue<T>(Item));
-    case R.State of
-      vsSomething: aAction(R.Value);
-      vsStop: Break;
+  OldFunc := FFunc;
+  Action :=
+    function (Item: T): Boolean
+    var
+      R: TValue<U>;
+    begin
+      Result := True;
+      R := OldFunc(TValue<T>(Item));
+      case R.State of
+        vsSomething: aAction(R.Value);
+        vsStop: Result := False;
+      end;
     end;
-  end;
+
+  FFunc(TValue<T>.Start);
+  FIterate(Action);
 end;
 
 function TSeq<T, U>.Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
 var
-  Item: T;
-  R: TValue<U>;
+  OldFunc: TValueFunc<T, U>;
+  Accumulator: TResult;
+  Folder: TPredicate<T>;
 begin
-  Result := aInitVal;
+  OldFunc := FFunc;
+
+  Folder :=
+    function (Item: T): Boolean
+    var
+      R: TValue<U>;
+    begin
+      Result := True;
+      R := OldFunc(TValue<T>(Item));
+      case R.State of
+        vsSomething: Accumulator := aFoldFunc(R.Value, Accumulator);
+        vsStop: Result := False;
+      end;
+    end;
+
+  Accumulator := aInitVal;
 
   FFunc(TValue<T>.Start);
-  for Item in FEnumerable do
-  begin
-    R := FFunc(TValue<T>(Item));
-    case R.State of
-      vsSomething: Result := aFoldFunc(R.Value, Result);
-      vsStop: Break;
-    end;
-  end;
+  FIterate(Folder);
+
+  Result := Accumulator;
 end;
 
 function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
@@ -136,7 +156,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, U>.Create(FEnumerable,
+  Result := TSeq<T, U>.Create(FIterate,
     function (X: TValue<T>): TValue<U>
     begin
       Result := OldFunc(X);
@@ -151,7 +171,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, TResult>.Create(FEnumerable,
+  Result := TSeq<T, TResult>.Create(FIterate,
     function (X: TValue<T>): TValue<TResult>
     var
       R: TValue<U>;
@@ -171,7 +191,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, U>.Create(FEnumerable,
+  Result := TSeq<T, U>.Create(FIterate,
     function (X: TValue<T>): TValue<U>
     begin
       if Counter = aCount then
@@ -194,7 +214,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, U>.Create(FEnumerable,
+  Result := TSeq<T, U>.Create(FIterate,
     function (X: TValue<T>): TValue<U>
     begin
       Result := OldFunc(X);
@@ -210,7 +230,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, U>.Create(FEnumerable,
+  Result := TSeq<T, U>.Create(FIterate,
     function (X: TValue<T>): TValue<U>
     begin
       Result := OldFunc(X);
@@ -233,7 +253,7 @@ var
 begin
   OldFunc := FFunc;
 
-  Result := TSeq<T, U>.Create(FEnumerable,
+  Result := TSeq<T, U>.Create(FIterate,
     function (X: TValue<T>): TValue<U>
     begin
       Result := OldFunc(X);
@@ -255,25 +275,29 @@ begin
 end;
 
 { TSeq<T> }
-
+{
 class operator TSeq<T>.Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
 begin
   Result.FEnumerable := aEnumerator;
 end;
-
+}
 procedure TSeq<T>.DoIt(const aAction: TProc<T>);
 var
-  Item: T;
+  Action: TPredicate<T>;
 begin
-  for Item in FEnumerable do
-  begin
-    aAction(Item);
-  end;
+  Action :=
+    function (Item: T): Boolean
+    begin
+      aAction(Item);
+      Result := True;
+    end;
+
+  FIterate(Action);
 end;
 
 function TSeq<T>.Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
 begin
-  Result := TSeq<T, T>.Create(FEnumerable,
+  Result := TSeq<T, T>.Create(FIterate,
     function (X: TValue<T>): TValue<T>
     begin
       Result := X;
@@ -284,19 +308,38 @@ end;
 
 function TSeq<T>.Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
 var
-  Item: T;
+  Accumulator: TResult;
+  Folder: TPredicate<T>;
 begin
-  Result := aInitVal;
+  Accumulator := aInitVal;
 
-  for Item in FEnumerable do
-  begin
-    Result := aFoldFunc(Item, Result);
-  end;
+  Folder :=
+    function (Item: T): Boolean
+    begin
+      Accumulator := aFoldFunc(Item, Accumulator);
+      Result := True;
+    end;
+
+  FIterate(Folder);
+  Result := Accumulator;
+end;
+
+class function TSeq<T>.From(aEnumerable: TEnumerable<T>): TSeq<T>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aEnumerable do
+        if not P(Item) then
+          Break;
+    end;
 end;
 
 function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
 begin
-  Result := TSeq<T, TResult>.Create(FEnumerable,
+  Result := TSeq<T, TResult>.Create(FIterate,
     function (X: TValue<T>): TValue<TResult>
     begin
       if X.State = vsSomething then
@@ -313,7 +356,7 @@ function TSeq<T>.Skip(const aCount: Integer): TSeq<T, T>;
 var
   Counter: Integer;
 begin
-  Result := TSeq<T, T>.Create(FEnumerable,
+  Result := TSeq<T, T>.Create(FIterate,
     function (X: TValue<T>): TValue<T>
     begin
       Result := X;
@@ -333,7 +376,7 @@ function TSeq<T>.SkipWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
 var
   Skipping: Boolean;
 begin
-  Result := TSeq<T, T>.Create(FEnumerable,
+  Result := TSeq<T, T>.Create(FIterate,
     function (X: TValue<T>): TValue<T>
     begin
       Result := X;
@@ -358,7 +401,7 @@ function TSeq<T>.Take(const aCount: Integer): TSeq<T, T>;
 var
   Counter: Integer;
 begin
-  Result := TSeq<T, T>.Create(FEnumerable,
+  Result := TSeq<T, T>.Create(FIterate,
     function (X: TValue<T>): TValue<T>
     begin
       if Counter = aCount then
@@ -377,7 +420,7 @@ end;
 
 function TSeq<T>.TakeWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
 begin
-  Result := TSeq<T, T>.Create(FEnumerable,
+  Result := TSeq<T, T>.Create(FIterate,
     function (X: TValue<T>): TValue<T>
     begin
       Result := X;
