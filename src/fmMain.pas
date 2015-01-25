@@ -10,7 +10,9 @@ type
   TForm6 = class(TForm)
     Memo1: TMemo;
     Button1: TButton;
+    Button2: TButton;
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     procedure PrintNum(X: Integer);
   end;
@@ -22,8 +24,9 @@ implementation
 
 {$R *.dfm}
 
-uses uSequence;
-//, Generics.Collections;
+uses
+  Generics.Collections,
+  uSequence;
 
 { TForm6 }
 
@@ -87,6 +90,27 @@ begin
 
   finally
     R.Free;
+  end;
+end;
+
+procedure TForm6.Button2Click(Sender: TObject);
+var
+  S: string;
+  I: TSeq<Char>;
+  CA: array[0..10] of Char;
+  CL: TList<Char>;
+begin
+  S := 'Hello, World!';
+//  SetLength(CA, Length(S));
+  StrLCopy(PChar(@CA[0]), PChar(S), Length(CA));
+
+  CL := TList<Char>.Create;
+  try
+    CL.AddRange(CA);
+    I := TSeq<Char>(CL);
+    I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+  finally
+    CL.Free;
   end;
 end;
 
