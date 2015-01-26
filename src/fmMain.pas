@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, uRange;
+  Dialogs, StdCtrls, uRange, Vcl.Grids, Vcl.DBGrids, Data.DB, Datasnap.DBClient;
 
 type
   TForm6 = class(TForm)
@@ -13,10 +13,15 @@ type
     Button2: TButton;
     Button3: TButton;
     Button4: TButton;
+    ClientDataSet1: TClientDataSet;
+    DataSource1: TDataSource;
+    DBGrid1: TDBGrid;
+    Button5: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
   private
     procedure PrintNum(X: Integer);
     function DoAction(X: Integer): Boolean;
@@ -31,7 +36,7 @@ implementation
 
 uses
   Generics.Collections,
-  uSequence;
+  uSequence, uSeq;
 
 { TForm6 }
 
@@ -178,6 +183,39 @@ begin
   finally
     S.Free;
   end;
+end;
+
+procedure TForm6.Button5Click(Sender: TObject);
+type
+  TEmpSummary = record
+    Count: Integer;
+    Sum: Currency;
+  end;
+var
+  EmpDS: TSeq<TDataSet, TDataSet>;
+  Total: TEmpSummary;
+begin
+  Total.Count := 0;
+  Total.Sum := 0;
+
+  EmpDS := TSequence.FromDataset(ClientDataSet1)
+    .Filter(function (D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency >= 35000 end);
+
+  EmpDS
+    .ForEach( procedure(D: TDataSet)
+              begin
+                Memo1.Lines.Add(Format('%s %s - %m',
+                  [D.FieldByName('FirstName').AsString, D.FieldByName('LastName').AsString,
+                  D.FieldByName('Salary').AsCurrency]))
+              end);
+
+  Total := EmpDS.Fold<TEmpSummary>(
+    function(D: TDataSet; Acc: TEmpSummary): TEmpSummary
+                        begin
+                          Result.Count := Acc.Count + 1;
+                          Result.Sum := Acc.Sum + D.FieldByName('Salary').AsCurrency;
+                        end, Total);
+  Memo1.Lines.Add(Format('Count=%d, Sum=%m', [Total.Count, Total.Sum]));
 end;
 
 function TForm6.DoAction(X: Integer): Boolean;

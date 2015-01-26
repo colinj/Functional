@@ -5,6 +5,7 @@ interface
 uses
   SysUtils, Classes,
   Generics.Collections,
+  DB,
   uValue, uSeq;
 
 type
@@ -25,9 +26,11 @@ type
   end;
 
   TSequence = record
+  private
   public
     class function FromString(const aString: string): TSequence<Char>; static;
     class function FromStringList(const aStrings: TStrings): TSequence<string>; static;
+    class function FromDataset(const aDataset: TDataSet): TSequence<TDataSet>; static;
   end;
 
 implementation
@@ -77,12 +80,12 @@ end;
 function TSequence<T>.Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
 begin
   Result := TSeq<T, T>.Create(FIterate,
-    function (X: TValue<T>): TValue<T>
+    function (Item: TValue<T>): TValue<T>
     begin
-      if X.IsSomething and not aPredicate(X.Value) then
+      if Item.IsSomething and not aPredicate(Item.Value) then
         Result := TValue<T>.Nothing
       else
-        Result := X;
+        Result := Item;
     end);
 end;
 
@@ -107,12 +110,12 @@ end;
 function TSequence<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
 begin
   Result := TSeq<T, TResult>.Create(FIterate,
-    function (X: TValue<T>): TValue<TResult>
+    function (Item: TValue<T>): TValue<TResult>
     begin
-      if X.IsSomething then
-        Result := TValue<TResult>(aMapper(X.Value))
+      if Item.IsSomething then
+        Result := TValue<TResult>(aMapper(Item.Value))
       else
-        Result.SetState(X.State);
+        Result.SetState(Item.State);
     end);
 end;
 
@@ -121,9 +124,9 @@ var
   Counter: Integer;
 begin
   Result := TSeq<T, T>.Create(FIterate,
-    function (X: TValue<T>): TValue<T>
+    function (Item: TValue<T>): TValue<T>
     begin
-      Result := X;
+      Result := Item;
       case Result.State of
         vsStart: Counter := 0;
         vsSomething:
@@ -141,9 +144,9 @@ var
   Skipping: Boolean;
 begin
   Result := TSeq<T, T>.Create(FIterate,
-    function (X: TValue<T>): TValue<T>
+    function (Item: TValue<T>): TValue<T>
     begin
-      Result := X;
+      Result := Item;
 
       case Result.State of
         vsStart: Skipping := True;
@@ -166,7 +169,7 @@ var
   Counter: Integer;
 begin
   Result := TSeq<T, T>.Create(FIterate,
-    function (X: TValue<T>): TValue<T>
+    function (Item: TValue<T>): TValue<T>
     begin
       if Counter = aCount then
         begin
@@ -174,7 +177,7 @@ begin
           Exit;
         end;
 
-      Result := X;
+      Result := Item;
       case Result.State of
         vsStart: Counter := 0;
         vsSomething: Inc(Counter);
@@ -185,12 +188,12 @@ end;
 function TSequence<T>.TakeWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
 begin
   Result := TSeq<T, T>.Create(FIterate,
-    function (X: TValue<T>): TValue<T>
+    function (Item: TValue<T>): TValue<T>
     begin
-      if X.IsSomething and not aPredicate(X.Value) then
+      if Item.IsSomething and not aPredicate(Item.Value) then
         Result := TValue<T>.Stop
       else
-        Result := X;
+        Result := Item;
     end);
 end;
 
@@ -219,6 +222,24 @@ begin
       for Item in aStrings do
         if not P(Item) then
           Break;
+    end;
+end;
+
+class function TSequence.FromDataset(const aDataset: TDataSet): TSequence<TDataSet>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<TDataSet>)
+    var
+      D: TDataSet;
+    begin
+      D := aDataset;
+      D.First;
+      while not D.Eof do
+      begin
+        if not P(D) then
+          Break;
+        D.Next;
+      end;
     end;
 end;
 

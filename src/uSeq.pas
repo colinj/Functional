@@ -8,8 +8,8 @@ uses
   uValue;
 
 type
-  TValueFunc<T, U> = reference to function (X: TValue<T>): TValue<U>;
-  TFoldFunc<T, U> = reference to function (X: T; Acc: U): U;
+  TValueFunc<T, U> = reference to function (Item: TValue<T>): TValue<U>;
+  TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
   TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
 
   TSeq<T, U> = record
@@ -97,9 +97,9 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, U>.Create(FIterate,
-    function (X: TValue<T>): TValue<U>
+    function (Item: TValue<T>): TValue<U>
     begin
-      Result := OldFunc(X);
+      Result := OldFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then
         Result := TValue<U>.Nothing;
     end);
@@ -112,11 +112,11 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, TResult>.Create(FIterate,
-    function (X: TValue<T>): TValue<TResult>
+    function (Item: TValue<T>): TValue<TResult>
     var
       R: TValue<U>;
     begin
-      R := OldFunc(X);
+      R := OldFunc(Item);
       if R.IsSomething then
         Result := TValue<TResult>(aMapper(R.Value))
       else
@@ -132,7 +132,7 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, U>.Create(FIterate,
-    function (X: TValue<T>): TValue<U>
+    function (Item: TValue<T>): TValue<U>
     begin
       if Counter = aCount then
         begin
@@ -140,7 +140,7 @@ begin
           Exit;
         end;
 
-      Result := OldFunc(X);
+      Result := OldFunc(Item);
       case Result.State of
         vsStart: Counter := 0;
         vsSomething: Inc(Counter);
@@ -155,9 +155,9 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, U>.Create(FIterate,
-    function (X: TValue<T>): TValue<U>
+    function (Item: TValue<T>): TValue<U>
     begin
-      Result := OldFunc(X);
+      Result := OldFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then
         Result := TValue<U>.Stop;
     end);
@@ -171,9 +171,9 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, U>.Create(FIterate,
-    function (X: TValue<T>): TValue<U>
+    function (Item: TValue<T>): TValue<U>
     begin
-      Result := OldFunc(X);
+      Result := OldFunc(Item);
       case Result.State of
         vsStart: Counter := 0;
         vsSomething:
@@ -194,9 +194,9 @@ begin
   OldFunc := FFunc;
 
   Result := TSeq<T, U>.Create(FIterate,
-    function (X: TValue<T>): TValue<U>
+    function (Item: TValue<T>): TValue<U>
     begin
-      Result := OldFunc(X);
+      Result := OldFunc(Item);
 
       case Result.State of
         vsStart: Skipping := True;
