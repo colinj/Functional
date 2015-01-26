@@ -38,7 +38,7 @@ type
     function TakeWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function SkipWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
-    procedure DoIt(const aAction: TProc<U>);
+    procedure ForEach(const aAction: TProc<U>);
   end;
 
   TSeq<T> = record
@@ -55,7 +55,7 @@ type
     function TakeWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function SkipWhile(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
-    procedure DoIt(const aAction: TProc<T>);
+    procedure ForEach(const aAction: TProc<T>);
   end;
 
   TSeqString = record
@@ -101,7 +101,7 @@ begin
   FFunc := aFunc;
 end;
 
-procedure TSeq<T, U>.DoIt(const aAction: TProc<U>);
+procedure TSeq<T, U>.ForEach(const aAction: TProc<U>);
 var
   OldFunc: TValueFunc<T, U>;
   Action: TPredicate<T>;
@@ -284,7 +284,7 @@ begin
   Result.FEnumerable := aEnumerator;
 end;
 }
-procedure TSeq<T>.DoIt(const aAction: TProc<T>);
+procedure TSeq<T>.ForEach(const aAction: TProc<T>);
 var
   Action: TPredicate<T>;
 begin

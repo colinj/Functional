@@ -12,9 +12,11 @@ type
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
+    Button4: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     procedure PrintNum(X: Integer);
     function DoAction(X: Integer): Boolean;
@@ -53,7 +55,7 @@ begin
 //      .Take(2);
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X + 7 end);
 
-//    I2.DoIt(PrintNum);
+//    I2.ForEach(PrintNum);
 
 //    J := TSeq<Integer>(R)
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
@@ -73,23 +75,23 @@ begin
 //      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
 //      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
-//      .DoIt(procedure (S: string) begin Memo1.Lines.Add(S) end);
+//      .ForEach(procedure (S: string) begin Memo1.Lines.Add(S) end);
 
   Memo1.Lines.Add('-----------------');
   I
     .TakeWhile(function(X: Integer): Boolean begin Result := X < 13 end)
-    .DoIt(PrintNum);
+    .ForEach(PrintNum);
 
   Memo1.Lines.Add('-----------------');
   I
     .SkipWhile(function(X: Integer): Boolean begin Result := X < 16 end)
-    .DoIt(PrintNum);
+    .ForEach(PrintNum);
 
   Memo1.Lines.Add('-----------------');
   I
     .SkipWhile(function(X: Integer): Boolean begin Result := X < 7 end)
     .TakeWhile(function(X: Integer): Boolean begin Result := X < 16 end)
-    .DoIt(PrintNum);
+    .ForEach(PrintNum);
 
   finally
     R.Free;
@@ -114,7 +116,7 @@ begin
 //  try
 //    CL.AddRange(CA);
 //    I := TSeq<Char>.From(CL);
-//    I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+//    I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 //  finally
 //    CL.Free;
 //  end;
@@ -124,10 +126,10 @@ begin
     CA2[J - 1] := S[J];
 
   I := TSeq<Char>.From(CA2);
-  I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+  I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
   I := TSeqString.From(S);
-  I.DoIt(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+  I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
 
 end;
@@ -160,6 +162,22 @@ begin
   Iterate(Adder);
   Memo1.Lines.Add(IntToStr(Acc));
 
+end;
+
+procedure TForm6.Button4Click(Sender: TObject);
+var
+  S: TStringList;
+begin
+  S := TStringList.Create;
+  try
+    S.CommaText := 'cat,dog,mouse,horse,pig,bear,goat,cow,sheep,rabbit,lion,tiger,cougar,snake';
+
+    TSeqStringList.From(S)
+//      .Filter(function (X: string): Boolean begin Result := Copy(X, 1, 1) = 'c' end)
+      .ForEach(procedure (X: string) begin Memo1.Lines.Add(X) end);
+  finally
+    S.Free;
+  end;
 end;
 
 function TForm6.DoAction(X: Integer): Boolean;

@@ -24,8 +24,8 @@ object Form6: TForm6
     TabOrder = 0
   end
   object Button1: TButton
-    Left = 48
-    Top = 64
+    Left = 32
+    Top = 24
     Width = 75
     Height = 25
     Caption = 'Button1'
@@ -33,8 +33,8 @@ object Form6: TForm6
     OnClick = Button1Click
   end
   object Button2: TButton
-    Left = 48
-    Top = 112
+    Left = 32
+    Top = 55
     Width = 75
     Height = 25
     Caption = 'Button2'
@@ -42,12 +42,21 @@ object Form6: TForm6
     OnClick = Button2Click
   end
   object Button3: TButton
-    Left = 48
-    Top = 160
+    Left = 32
+    Top = 86
     Width = 75
     Height = 25
     Caption = 'Button3'
     TabOrder = 3
     OnClick = Button3Click
+  end
+  object Button4: TButton
+    Left = 32
+    Top = 117
+    Width = 75
+    Height = 25
+    Caption = 'Button4'
+    TabOrder = 4
+    OnClick = Button4Click
   end
 end
