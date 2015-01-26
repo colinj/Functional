@@ -38,16 +38,15 @@ uses
 procedure TForm6.Button1Click(Sender: TObject);
 var
   R: TIntegerRange;
-  I: TSeq<Integer>;
-  I2: TSeq<Integer, Integer>;
+  I: TSequence<Integer>;
 //  S: TList<string>;
   J: Integer;
   S: string;
 begin
   R := TIntegerRange.Create(1, 20);
   try
-    I := TSeq<Integer>(R);
-//    I2 := TSeq<Integer>(R)
+    I := TSequence<Integer>(R);
+//    I2 := TSequence<Integer>(R)
 //      .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
 //      .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
@@ -57,7 +56,7 @@ begin
 
 //    I2.ForEach(PrintNum);
 
-//    J := TSeq<Integer>(R)
+//    J := TSequence<Integer>(R)
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
 //      .Take(5)
 //      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
@@ -71,7 +70,7 @@ begin
                           Result := Acc + IntToStr(X)
                         end, '');
     Memo1.Lines.Add(S);
-//    TSeq<Integer>(R)
+//    TSequence<Integer>(R)
 //      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
 //      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
@@ -102,7 +101,7 @@ procedure TForm6.Button2Click(Sender: TObject);
 var
   C: Char;
   S: string;
-  I: TSeq<Char>;
+  I: TSequence<Char>;
   CA: array[0..10] of Char;
   CA2: TArray<Char>;
   CL: TList<Char>;
@@ -115,7 +114,7 @@ begin
 //  CL := TList<Char>.Create;
 //  try
 //    CL.AddRange(CA);
-//    I := TSeq<Char>.From(CL);
+//    I := TSequence<Char>.From(CL);
 //    I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 //  finally
 //    CL.Free;
@@ -125,7 +124,7 @@ begin
   for J := 1 to Length(S) do
     CA2[J - 1] := S[J];
 
-  I := TSeq<Char>(CA2);
+  I := TSequence<Char>(CA2);
   I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
   I := TSequence.FromString(S);
@@ -167,7 +166,7 @@ end;
 procedure TForm6.Button4Click(Sender: TObject);
 var
   S: TStringList;
-  T: TSeq<string>;
+  T: TSequence<string>;
 begin
   S := TStringList.Create;
   try
