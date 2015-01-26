@@ -46,7 +46,7 @@ var
 begin
   R := TIntegerRange.Create(1, 20);
   try
-    I := TSeq<Integer>.From(R);
+    I := TSeq<Integer>(R);
 //    I2 := TSeq<Integer>(R)
 //      .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
@@ -125,13 +125,13 @@ begin
   for J := 1 to Length(S) do
     CA2[J - 1] := S[J];
 
-  I := TSeq<Char>.From(CA2);
+  I := TSeq<Char>(CA2);
   I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
-  I := TSeqString.From(S);
+  I := TSequence.FromString(S);
   I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
-
+  TSequence.FromString(S).ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 end;
 
 procedure TForm6.Button3Click(Sender: TObject);
@@ -167,12 +167,13 @@ end;
 procedure TForm6.Button4Click(Sender: TObject);
 var
   S: TStringList;
+  T: TSeq<string>;
 begin
   S := TStringList.Create;
   try
     S.CommaText := 'cat,dog,mouse,horse,pig,bear,goat,cow,sheep,rabbit,lion,tiger,cougar,snake';
 
-    TSeqStringList.From(S)
+    TSequence.FromStringList(S)
 //      .Filter(function (X: string): Boolean begin Result := Copy(X, 1, 1) = 'c' end)
       .ForEach(procedure (X: string) begin Memo1.Lines.Add(X) end);
   finally

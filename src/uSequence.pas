@@ -45,9 +45,8 @@ type
   private
     FIterate: TIteratorProc<T>;
   public
-//    class operator Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
-    class function From(aEnumerable: TEnumerable<T>): TSeq<T>; overload; static;
-    class function From(const aArray: TArray<T>): TSeq<T>; overload; static;
+    class operator Implicit(const aArray: TArray<T>): TSeq<T>; overload;
+    class operator Implicit(const aEnumerable: TEnumerable<T>): TSeq<T>; overload;
     function Filter(const aPredicate: TPredicate<T>): TSeq<T, T>;
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
     function Take(const aCount: Integer): TSeq<T, T>;
@@ -58,14 +57,10 @@ type
     procedure ForEach(const aAction: TProc<T>);
   end;
 
-  TSeqString = record
+  TSequence = record
   public
-    class function From(const aString: string): TSeq<Char>; static;
-  end;
-
-  TSeqStringList = record
-  public
-    class function From(const aStrings: TStrings): TSeq<string>; static;
+    class function FromString(const aString: string): TSeq<Char>; static;
+    class function FromStringList(const aStrings: TStrings): TSeq<string>; static;
   end;
 
 implementation
@@ -278,12 +273,33 @@ begin
 end;
 
 { TSeq<T> }
-{
-class operator TSeq<T>.Implicit(const aEnumerator: TEnumerable<T>): TSeq<T>;
+
+class operator TSeq<T>.Implicit(const aArray: TArray<T>): TSeq<T>;
 begin
-  Result.FEnumerable := aEnumerator;
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aArray do
+        if not P(Item) then
+          Break;
+    end;
 end;
-}
+
+class operator TSeq<T>.Implicit(const aEnumerable: TEnumerable<T>): TSeq<T>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aEnumerable do
+        if not P(Item) then
+          Break;
+    end;
+end;
+
 procedure TSeq<T>.ForEach(const aAction: TProc<T>);
 var
   Action: TPredicate<T>;
@@ -325,32 +341,6 @@ begin
 
   FIterate(Folder);
   Result := Accumulator;
-end;
-
-class function TSeq<T>.From(const aArray: TArray<T>): TSeq<T>;
-begin
-  Result.FIterate :=
-    procedure (P: TPredicate<T>)
-    var
-      Item: T;
-    begin
-      for Item in aArray do
-        if not P(Item) then
-          Break;
-    end;
-end;
-
-class function TSeq<T>.From(aEnumerable: TEnumerable<T>): TSeq<T>;
-begin
-  Result.FIterate :=
-    procedure (P: TPredicate<T>)
-    var
-      Item: T;
-    begin
-      for Item in aEnumerable do
-        if not P(Item) then
-          Break;
-    end;
 end;
 
 function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
@@ -445,9 +435,9 @@ begin
     end);
 end;
 
-{ TSeqString }
+{ TSequence }
 
-class function TSeqString.From(const aString: string): TSeq<Char>;
+class function TSequence.FromString(const aString: string): TSeq<Char>;
 begin
   Result.FIterate :=
     procedure (P: TPredicate<Char>)
@@ -460,9 +450,7 @@ begin
     end;
 end;
 
-{ TSeqStringList }
-
-class function TSeqStringList.From(const aStrings: TStrings): TSeq<string>;
+class function TSequence.FromStringList(const aStrings: TStrings): TSeq<string>;
 begin
   Result.FIterate :=
     procedure (P: TPredicate<string>)
