@@ -63,6 +63,11 @@ type
     class function From(const aString: string): TSeq<Char>; static;
   end;
 
+  TSeqStringList = record
+  public
+    class function From(const aStrings: TStrings): TSeq<string>; static;
+  end;
+
 implementation
 
 { TValue<T> }
@@ -450,6 +455,21 @@ begin
       Item: Char;
     begin
       for Item in aString do
+        if not P(Item) then
+          Break;
+    end;
+end;
+
+{ TSeqStringList }
+
+class function TSeqStringList.From(const aStrings: TStrings): TSeq<string>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<string>)
+    var
+      Item: string;
+    begin
+      for Item in aStrings do
         if not P(Item) then
           Break;
     end;
