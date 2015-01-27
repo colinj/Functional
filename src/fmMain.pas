@@ -36,7 +36,7 @@ implementation
 
 uses
   Generics.Collections,
-  uSequence, uSeq;
+  uSequence;
 
 { TForm6 }
 
@@ -192,7 +192,7 @@ type
     Sum: Currency;
   end;
 var
-  EmpDS: TSeq<TDataSet, TDataSet>;
+  EmpDS: TSequence<TDataSet, TDataSet>;
   Total: TEmpSummary;
 begin
   Total.Count := 0;
