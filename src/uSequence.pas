@@ -26,6 +26,7 @@ type
     function TakeWhile(const aPredicate: TPredicate<U>): TSequence<T, U>;
     function SkipWhile(const aPredicate: TPredicate<U>): TSequence<T, U>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
+    function ToList: TList<U>;
     procedure ForEach(const aAction: TProc<U>);
   end;
 
@@ -42,6 +43,7 @@ type
     function TakeWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
     function SkipWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
     function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
+    function ToList: TList<T>;
     procedure ForEach(const aAction: TProc<T>);
   end;
 
@@ -185,6 +187,30 @@ begin
       if Result.IsSomething and not aPredicate(Result.Value) then
         Result := TValue<U>.Stop;
     end);
+end;
+
+function TSequence<T, U>.ToList: TList<U>;
+var
+  OldFunc: TValueFunc<T, U>;
+  ItemList: TList<U>;
+  AddItem: TPredicate<T>;
+begin
+  OldFunc := FFunc;
+
+  AddItem :=
+    function (Item: T): Boolean
+    var
+      R: TValue<U>;
+    begin
+      R := OldFunc(TValue<T>(Item));
+      if R.IsSomething then
+        ItemList.Add(R.Value);
+      Result := R.State <> vsStop;
+    end;
+
+  ItemList := TList<U>.Create;
+  FIterate(AddItem);
+  Result := ItemList;
 end;
 
 function TSequence<T, U>.Skip(const aCount: Integer): TSequence<T, U>;
@@ -398,6 +424,23 @@ begin
       else
         Result := Item;
     end);
+end;
+
+function TSequence<T>.ToList: TList<T>;
+var
+  ItemList: TList<T>;
+  AddItem: TPredicate<T>;
+begin
+  AddItem :=
+    function (Item: T): Boolean
+    begin
+      ItemList.Add(Item);
+      Result := True;
+    end;
+
+  ItemList := TList<T>.Create;
+  FIterate(AddItem);
+  Result := ItemList;
 end;
 
 { TSequence }
