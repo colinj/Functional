@@ -74,7 +74,7 @@ uses
 procedure TForm6.Button1Click(Sender: TObject);
 var
   R: TIntegerRange;
-  I: TSequence<Integer>;
+  I: TSequence<Integer, Integer>;
   J: Integer;
   S: string;
   I2: TSequence<Integer,Integer>;
@@ -144,7 +144,7 @@ procedure TForm6.Button2Click(Sender: TObject);
 var
   C: Char;
   S: string;
-  I: TSequence<Char>;
+  I: TSequence<Char, Char>;
   CA: array[0..10] of Char;
   CA2: TArray<Char>;
   CL: TList<Char>;
@@ -209,7 +209,6 @@ end;
 procedure TForm6.Button4Click(Sender: TObject);
 var
   S: TStringList;
-  T: TSequence<string>;
 begin
   S := TStringList.Create;
   try

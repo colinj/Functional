@@ -13,7 +13,6 @@ type
   TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
   TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
 
-
   TSequence<T, U> = record
   private
     FFunc: TValueFunc<T, U>;
@@ -31,28 +30,13 @@ type
     procedure ForEach(const aAction: TProc<U>);
   end;
 
-  TSequence<T> = record
-  private
-    FIterate: TIteratorProc<T>;
-  public
-    function Filter(const aPredicate: TPredicate<T>): TSequence<T, T>;
-    function Map<TResult>(const aMapper: TFunc<T, TResult>): TSequence<T, TResult>;
-    function Take(const aCount: Integer): TSequence<T, T>;
-    function Skip(const aCount: Integer): TSequence<T, T>;
-    function TakeWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
-    function SkipWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
-    function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
-    function ToList: TList<T>;
-    procedure ForEach(const aAction: TProc<T>);
-  end;
-
   TSequence = record
   public
-    class function From<T>(const aArray: TArray<T>): TSequence<T>; overload; static;
-    class function From<T>(const aEnumerable: TEnumerable<T>): TSequence<T>; overload; static;
-    class function From(const aString: string): TSequence<Char>; overload; static;
-    class function From(const aStrings: TStrings): TSequence<string>; overload; static;
-    class function From(const aDataset: TDataSet): TSequence<TDataSet>; overload; static;
+    class function From<T>(const aArray: TArray<T>): TSequence<T, T>; overload; static;
+    class function From<T>(const aEnumerable: TEnumerable<T>): TSequence<T, T>; overload; static;
+    class function From(const aString: string): TSequence<Char, Char>; overload; static;
+    class function From(const aStrings: TStrings): TSequence<string, string>; overload; static;
+    class function From(const aDataset: TDataSet): TSequence<TDataSet, TDataSet>; overload; static;
   end;
 
 implementation
@@ -266,164 +250,11 @@ begin
     end);
 end;
 
-{ TSequence<T> }
-
-procedure TSequence<T>.ForEach(const aAction: TProc<T>);
-var
-  Action: TPredicate<T>;
-begin
-  Action :=
-    function (Item: T): Boolean
-    begin
-      aAction(Item);
-      Result := True;
-    end;
-
-  FIterate(Action);
-end;
-
-function TSequence<T>.Filter(const aPredicate: TPredicate<T>): TSequence<T, T>;
-begin
-  Result := TSequence<T, T>.Create(FIterate,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      if Item.IsSomething and not aPredicate(Item.Value) then
-        Result := TValue<T>.Nothing
-      else
-        Result := Item;
-    end);
-end;
-
-function TSequence<T>.Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
-var
-  Accumulator: TResult;
-  Folder: TPredicate<T>;
-begin
-  Accumulator := aInitVal;
-
-  Folder :=
-    function (Item: T): Boolean
-    begin
-      Accumulator := aFoldFunc(Item, Accumulator);
-      Result := True;
-    end;
-
-  FIterate(Folder);
-  Result := Accumulator;
-end;
-
-function TSequence<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSequence<T, TResult>;
-begin
-  Result := TSequence<T, TResult>.Create(FIterate,
-    function (Item: TValue<T>): TValue<TResult>
-    begin
-      if Item.IsSomething then
-        Result := TValue<TResult>(aMapper(Item.Value))
-      else
-        Result.SetState(Item.State);
-    end);
-end;
-
-function TSequence<T>.Skip(const aCount: Integer): TSequence<T, T>;
-var
-  Counter: Integer;
-begin
-  Result := TSequence<T, T>.Create(FIterate,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      Result := Item;
-      case Result.State of
-        vsStart: Counter := 0;
-        vsSomething:
-          begin
-            Inc(Counter);
-            if Counter <= aCount then
-              Result := TValue<T>.Nothing;
-          end;
-      end;
-    end);
-end;
-
-function TSequence<T>.SkipWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
-var
-  Skipping: Boolean;
-begin
-  Result := TSequence<T, T>.Create(FIterate,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      Result := Item;
-
-      case Result.State of
-        vsStart: Skipping := True;
-        vsSomething:
-          begin
-            if Skipping then
-            begin
-              if aPredicate(Result.Value) then
-                Result := TValue<T>.Nothing
-              else
-                Skipping := False;
-            end;
-          end;
-      end;
-    end);
-end;
-
-function TSequence<T>.Take(const aCount: Integer): TSequence<T, T>;
-var
-  Counter: Integer;
-begin
-  Result := TSequence<T, T>.Create(FIterate,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      if Counter = aCount then
-        begin
-          Result := TValue<T>.Stop;
-          Exit;
-        end;
-
-      Result := Item;
-      case Result.State of
-        vsStart: Counter := 0;
-        vsSomething: Inc(Counter);
-      end;
-    end);
-end;
-
-function TSequence<T>.TakeWhile(const aPredicate: TPredicate<T>): TSequence<T, T>;
-begin
-  Result := TSequence<T, T>.Create(FIterate,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      if Item.IsSomething and not aPredicate(Item.Value) then
-        Result := TValue<T>.Stop
-      else
-        Result := Item;
-    end);
-end;
-
-function TSequence<T>.ToList: TList<T>;
-var
-  ItemList: TList<T>;
-  AddItem: TPredicate<T>;
-begin
-  AddItem :=
-    function (Item: T): Boolean
-    begin
-      ItemList.Add(Item);
-      Result := True;
-    end;
-
-  ItemList := TList<T>.Create;
-  FIterate(AddItem);
-  Result := ItemList;
-end;
-
 { TSequence }
 
-class function TSequence.From<T>(const aArray: TArray<T>): TSequence<T>;
+class function TSequence.From<T>(const aArray: TArray<T>): TSequence<T, T>;
 begin
-  Result.FIterate :=
+  Result := TSequence<T, T>.Create(
     procedure (P: TPredicate<T>)
     var
       Item: T;
@@ -431,12 +262,17 @@ begin
       for Item in aArray do
         if not P(Item) then
           Break;
-    end;
+    end
+    ,
+    function (Item: TValue<T>): TValue<T>
+    begin
+      Result := Item;
+    end);
 end;
 
-class function TSequence.From<T>(const aEnumerable: TEnumerable<T>): TSequence<T>;
+class function TSequence.From<T>(const aEnumerable: TEnumerable<T>): TSequence<T, T>;
 begin
-  Result.FIterate :=
+  Result := TSequence<T, T>.Create(
     procedure (P: TPredicate<T>)
     var
       Item: T;
@@ -444,12 +280,17 @@ begin
       for Item in aEnumerable do
         if not P(Item) then
           Break;
-    end;
+    end
+    ,
+    function (Item: TValue<T>): TValue<T>
+    begin
+      Result := Item;
+    end);
 end;
 
-class function TSequence.From(const aString: string): TSequence<Char>;
+class function TSequence.From(const aString: string): TSequence<Char, Char>;
 begin
-  Result.FIterate :=
+  Result := TSequence<Char, Char>.Create(
     procedure (P: TPredicate<Char>)
     var
       Item: Char;
@@ -457,12 +298,17 @@ begin
       for Item in aString do
         if not P(Item) then
           Break;
-    end;
+    end
+    ,
+    function (Item: TValue<Char>): TValue<Char>
+    begin
+      Result := Item;
+    end);
 end;
 
-class function TSequence.From(const aStrings: TStrings): TSequence<string>;
+class function TSequence.From(const aStrings: TStrings): TSequence<string, string>;
 begin
-  Result.FIterate :=
+  Result := TSequence<string, string>.Create(
     procedure (P: TPredicate<string>)
     var
       Item: string;
@@ -470,12 +316,17 @@ begin
       for Item in aStrings do
         if not P(Item) then
           Break;
-    end;
+    end
+    ,
+    function (Item: TValue<string>): TValue<string>
+    begin
+      Result := Item;
+    end);
 end;
 
-class function TSequence.From(const aDataset: TDataSet): TSequence<TDataSet>;
+class function TSequence.From(const aDataset: TDataSet): TSequence<TDataSet, TDataSet>;
 begin
-  Result.FIterate :=
+  Result := TSequence<TDataSet, TDataSet>.Create(
     procedure (P: TPredicate<TDataSet>)
     var
       D: TDataSet;
@@ -488,7 +339,12 @@ begin
           Break;
         D.Next;
       end;
-    end;
+    end
+    ,
+    function (Item: TValue<TDataSet>): TValue<TDataSet>
+    begin
+      Result := Item;
+    end);
 end;
 
 end.
