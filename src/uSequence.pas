@@ -10,8 +10,9 @@ uses
 
 type
   TValueFunc<T, U> = reference to function (Item: TValue<T>): TValue<U>;
-  TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
   TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
+  TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
+
 
   TSequence<T, U> = record
   private
@@ -34,8 +35,6 @@ type
   private
     FIterate: TIteratorProc<T>;
   public
-    class operator Implicit(const aArray: TArray<T>): TSequence<T>; overload;
-    class operator Implicit(const aEnumerable: TEnumerable<T>): TSequence<T>; overload;
     function Filter(const aPredicate: TPredicate<T>): TSequence<T, T>;
     function Map<TResult>(const aMapper: TFunc<T, TResult>): TSequence<T, TResult>;
     function Take(const aCount: Integer): TSequence<T, T>;
@@ -49,9 +48,11 @@ type
 
   TSequence = record
   public
-    class function FromString(const aString: string): TSequence<Char>; static;
-    class function FromStringList(const aStrings: TStrings): TSequence<string>; static;
-    class function FromDataset(const aDataset: TDataSet): TSequence<TDataSet>; static;
+    class function From<T>(const aArray: TArray<T>): TSequence<T>; overload; static;
+    class function From<T>(const aEnumerable: TEnumerable<T>): TSequence<T>; overload; static;
+    class function From(const aString: string): TSequence<Char>; overload; static;
+    class function From(const aStrings: TStrings): TSequence<string>; overload; static;
+    class function From(const aDataset: TDataSet): TSequence<TDataSet>; overload; static;
   end;
 
 implementation
@@ -70,6 +71,7 @@ var
   Action: TPredicate<T>;
 begin
   OldFunc := FFunc;
+
   Action :=
     function (Item: T): Boolean
     var
@@ -266,32 +268,6 @@ end;
 
 { TSequence<T> }
 
-class operator TSequence<T>.Implicit(const aArray: TArray<T>): TSequence<T>;
-begin
-  Result.FIterate :=
-    procedure (P: TPredicate<T>)
-    var
-      Item: T;
-    begin
-      for Item in aArray do
-        if not P(Item) then
-          Break;
-    end;
-end;
-
-class operator TSequence<T>.Implicit(const aEnumerable: TEnumerable<T>): TSequence<T>;
-begin
-  Result.FIterate :=
-    procedure (P: TPredicate<T>)
-    var
-      Item: T;
-    begin
-      for Item in aEnumerable do
-        if not P(Item) then
-          Break;
-    end;
-end;
-
 procedure TSequence<T>.ForEach(const aAction: TProc<T>);
 var
   Action: TPredicate<T>;
@@ -445,7 +421,33 @@ end;
 
 { TSequence }
 
-class function TSequence.FromString(const aString: string): TSequence<Char>;
+class function TSequence.From<T>(const aArray: TArray<T>): TSequence<T>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aArray do
+        if not P(Item) then
+          Break;
+    end;
+end;
+
+class function TSequence.From<T>(const aEnumerable: TEnumerable<T>): TSequence<T>;
+begin
+  Result.FIterate :=
+    procedure (P: TPredicate<T>)
+    var
+      Item: T;
+    begin
+      for Item in aEnumerable do
+        if not P(Item) then
+          Break;
+    end;
+end;
+
+class function TSequence.From(const aString: string): TSequence<Char>;
 begin
   Result.FIterate :=
     procedure (P: TPredicate<Char>)
@@ -458,7 +460,7 @@ begin
     end;
 end;
 
-class function TSequence.FromStringList(const aStrings: TStrings): TSequence<string>;
+class function TSequence.From(const aStrings: TStrings): TSequence<string>;
 begin
   Result.FIterate :=
     procedure (P: TPredicate<string>)
@@ -471,7 +473,7 @@ begin
     end;
 end;
 
-class function TSequence.FromDataset(const aDataset: TDataSet): TSequence<TDataSet>;
+class function TSequence.From(const aDataset: TDataSet): TSequence<TDataSet>;
 begin
   Result.FIterate :=
     procedure (P: TPredicate<TDataSet>)

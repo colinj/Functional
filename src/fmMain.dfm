@@ -2,8 +2,8 @@ object Form6: TForm6
   Left = 0
   Top = 0
   Caption = 'Form6'
-  ClientHeight = 341
-  ClientWidth = 1053
+  ClientHeight = 421
+  ClientWidth = 662
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,73 +13,206 @@ object Form6: TForm6
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object Memo1: TMemo
-    Left = 684
-    Top = 26
-    Width = 361
-    Height = 265
-    Lines.Strings = (
-      'Memo1')
-    ScrollBars = ssVertical
+  object PageControl1: TPageControl
+    AlignWithMargins = True
+    Left = 3
+    Top = 3
+    Width = 167
+    Height = 415
+    ActivePage = TabSheet2
+    Align = alLeft
     TabOrder = 0
+    object TabSheet2: TTabSheet
+      Caption = 'Counter'
+      ImageIndex = 1
+      object Button6: TButton
+        Left = 16
+        Top = 16
+        Width = 129
+        Height = 25
+        Caption = 'Static Counter'
+        TabOrder = 0
+        OnClick = Button6Click
+      end
+      object Button7: TButton
+        Left = 16
+        Top = 72
+        Width = 129
+        Height = 25
+        Caption = 'Anonymous Counter'
+        TabOrder = 1
+        OnClick = Button7Click
+      end
+      object Button11: TButton
+        Left = 56
+        Top = 160
+        Width = 75
+        Height = 25
+        Caption = 'Button11'
+        TabOrder = 2
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'TSequence'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object Button1: TButton
+        Left = 32
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Button1'
+        TabOrder = 0
+        OnClick = Button1Click
+      end
+      object Button2: TButton
+        Left = 32
+        Top = 55
+        Width = 75
+        Height = 25
+        Caption = 'Button2'
+        TabOrder = 1
+        OnClick = Button2Click
+      end
+      object Button3: TButton
+        Left = 32
+        Top = 86
+        Width = 75
+        Height = 25
+        Caption = 'Button3'
+        TabOrder = 2
+        OnClick = Button3Click
+      end
+      object Button4: TButton
+        Left = 32
+        Top = 117
+        Width = 75
+        Height = 25
+        Caption = 'Button4'
+        TabOrder = 3
+        OnClick = Button4Click
+      end
+      object Button5: TButton
+        Left = 32
+        Top = 148
+        Width = 75
+        Height = 25
+        Caption = 'Button5'
+        TabOrder = 4
+        OnClick = Button5Click
+      end
+      object Button9: TButton
+        Left = 32
+        Top = 192
+        Width = 75
+        Height = 25
+        Caption = 'Button9'
+        TabOrder = 5
+        OnClick = Button9Click
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'DataSet'
+      ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object Button10: TButton
+        Left = 24
+        Top = 20
+        Width = 75
+        Height = 25
+        Caption = 'Button5'
+        TabOrder = 0
+        OnClick = Button5Click
+      end
+      object btnDsLoop: TButton
+        Left = 24
+        Top = 64
+        Width = 75
+        Height = 25
+        Caption = 'Loop'
+        TabOrder = 1
+        OnClick = btnDsLoopClick
+      end
+    end
   end
-  object Button1: TButton
-    Left = 32
-    Top = 24
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
+  object Panel1: TPanel
+    Left = 173
+    Top = 0
+    Width = 489
+    Height = 421
+    Align = alClient
+    Caption = 'Panel1'
     TabOrder = 1
-    OnClick = Button1Click
-  end
-  object Button2: TButton
-    Left = 32
-    Top = 55
-    Width = 75
-    Height = 25
-    Caption = 'Button2'
-    TabOrder = 2
-    OnClick = Button2Click
-  end
-  object Button3: TButton
-    Left = 32
-    Top = 86
-    Width = 75
-    Height = 25
-    Caption = 'Button3'
-    TabOrder = 3
-    OnClick = Button3Click
-  end
-  object Button4: TButton
-    Left = 32
-    Top = 117
-    Width = 75
-    Height = 25
-    Caption = 'Button4'
-    TabOrder = 4
-    OnClick = Button4Click
-  end
-  object DBGrid1: TDBGrid
-    Left = 169
-    Top = 8
-    Width = 401
-    Height = 227
-    DataSource = DataSource1
-    TabOrder = 5
-    TitleFont.Charset = DEFAULT_CHARSET
-    TitleFont.Color = clWindowText
-    TitleFont.Height = -11
-    TitleFont.Name = 'Tahoma'
-    TitleFont.Style = []
-  end
-  object Button5: TButton
-    Left = 32
-    Top = 148
-    Width = 75
-    Height = 25
-    Caption = 'Button5'
-    TabOrder = 6
-    OnClick = Button5Click
+    object Panel2: TPanel
+      Left = 1
+      Top = 381
+      Width = 487
+      Height = 39
+      Align = alBottom
+      TabOrder = 0
+      DesignSize = (
+        487
+        39)
+      object Button8: TButton
+        Left = 379
+        Top = 3
+        Width = 95
+        Height = 25
+        Anchors = [akTop, akRight]
+        Caption = 'Clear'
+        TabOrder = 0
+        OnClick = Button8Click
+      end
+    end
+    object PageControl2: TPageControl
+      AlignWithMargins = True
+      Left = 4
+      Top = 4
+      Width = 481
+      Height = 374
+      ActivePage = TabSheet3
+      Align = alClient
+      TabOrder = 1
+      object TabSheet3: TTabSheet
+        Caption = 'Log'
+        object Memo1: TMemo
+          Left = 0
+          Top = 0
+          Width = 473
+          Height = 346
+          Align = alClient
+          ScrollBars = ssVertical
+          TabOrder = 0
+        end
+      end
+      object TabSheet4: TTabSheet
+        Caption = 'DataSet'
+        ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 391
+        ExplicitHeight = 0
+        object DBGrid1: TDBGrid
+          Left = 0
+          Top = 0
+          Width = 671
+          Height = 346
+          Align = alClient
+          DataSource = DataSource1
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'Tahoma'
+          TitleFont.Style = []
+        end
+      end
+    end
   end
   object ClientDataSet1: TClientDataSet
     Active = True
@@ -88,8 +221,8 @@ object Form6: TForm6
       'C:\Users\Public\Documents\RAD Studio\9.0\Samples\Data\employee.c' +
       'ds'
     Params = <>
-    Left = 248
-    Top = 248
+    Left = 40
+    Top = 272
     Data = {
       890700009619E0BD010000001800000006002A00000003000000DB0005456D70
       4E6F0400010000000000084C6173744E616D6501004900000001000557494454
@@ -155,7 +288,7 @@ object Form6: TForm6
   end
   object DataSource1: TDataSource
     DataSet = ClientDataSet1
-    Left = 304
-    Top = 248
+    Left = 64
+    Top = 352
   end
 end

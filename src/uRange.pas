@@ -9,7 +9,7 @@ uses
 type
   TIntegerRangeEnumerator = class;
 
-  TIntegerRange = class(TEnumerable<Integer>{, IEnumerable<Integer>})
+  TIntegerRange = class(TEnumerable<Integer>)
   private
     FFirst: Integer;
     FLast: Integer;
@@ -17,25 +17,39 @@ type
     function DoGetEnumerator: TEnumerator<Integer>; override;
   public
     constructor Create(const aFirst, aLast: Integer);
-//    function GetEnumerator: IEnumerator;
-//    function GenericGetEnumerator: IEnumerator<Integer>;
-//    function IEnumerable<Integer>.GetEnumerator = GenericGetEnumerator;
   end;
 
   TIntegerRangeEnumerator = class(TEnumerator<Integer>)
   private
     FRange: TIntegerRange;
     FIndex: Integer;
-//    function GetCurrent: TObject;
   protected
     function DoGetCurrent: Integer; override;
     function DoMoveNext: Boolean; override;
   public
     constructor Create(aRange: TIntegerRange);
-//    function GenericGetCurrent: Integer;
-//    function IEnumerator<Integer>.GetCurrent = GenericGetCurrent;
-//    function  MoveNext: Boolean;
-//    procedure Reset;
+  end;
+
+  TIntegerStreamEnumerator = class;
+
+  TIntegerStream = class(TEnumerable<Integer>)
+  private
+    FStart: Integer;
+  protected
+    function DoGetEnumerator: TEnumerator<Integer>; override;
+  public
+    constructor Create(const aStart: Integer = 0);
+  end;
+
+  TIntegerStreamEnumerator = class(TEnumerator<Integer>)
+  private
+    FStream: TIntegerStream;
+    FIndex: Integer;
+  protected
+    function DoGetCurrent: Integer; override;
+    function DoMoveNext: Boolean; override;
+  public
+    constructor Create(aStream: TIntegerStream);
   end;
 
 implementation
@@ -48,29 +62,7 @@ begin
   FRange := aRange;
   FIndex := FRange.FFirst - 1;
 end;
-{
-function TIntegerRangeEnumerator.GenericGetCurrent: Integer;
-begin
-  Result := FIndex;
-end;
 
-function TIntegerRangeEnumerator.GetCurrent: TObject;
-begin
-  Result := nil;
-end;
-
-function TIntegerRangeEnumerator.MoveNext: Boolean;
-begin
-  Result := FIndex < FRange.FLast;
-  if Result then
-    Inc(FIndex);
-end;
-
-procedure TIntegerRangeEnumerator.Reset;
-begin
-  FIndex := FRange.FFirst - 1;
-end;
-}
 function TIntegerRangeEnumerator.DoGetCurrent: Integer;
 begin
   Result := FIndex;
@@ -96,15 +88,39 @@ function TIntegerRange.DoGetEnumerator: TEnumerator<Integer>;
 begin
   Result := TIntegerRangeEnumerator.Create(Self);
 end;
-{
-function TIntegerRange.GenericGetEnumerator: IEnumerator<Integer>;
+
+{ TIntegerStream }
+
+constructor TIntegerStream.Create(const aStart: Integer);
 begin
-  Result := TIntegerRangeEnumerator.Create(Self);
+  inherited Create;
+  FStart := aStart;
 end;
 
-function TIntegerRange.GetEnumerator: IEnumerator;
+function TIntegerStream.DoGetEnumerator: TEnumerator<Integer>;
 begin
-  Result := TIntegerRangeEnumerator.Create(Self);
+  Result := TIntegerStreamEnumerator.Create(Self);
 end;
-}
+
+{ TIntegerStreamEnumerator }
+
+constructor TIntegerStreamEnumerator.Create(aStream: TIntegerStream);
+begin
+  inherited Create;
+  FStream := aStream;
+  FIndex := FStream.FStart - 1;
+end;
+
+function TIntegerStreamEnumerator.DoGetCurrent: Integer;
+begin
+  Result := FIndex;
+end;
+
+function TIntegerStreamEnumerator.DoMoveNext: Boolean;
+begin
+  Result := FIndex < MaxInt;
+  if Result then
+    Inc(FIndex);
+end;
+
 end.

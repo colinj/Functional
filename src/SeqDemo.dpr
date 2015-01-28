@@ -5,7 +5,8 @@ uses
   fmMain in 'fmMain.pas' {Form6},
   uSequence in 'uSequence.pas',
   uRange in 'uRange.pas',
-  uValue in 'uValue.pas';
+  uValue in 'uValue.pas',
+  uCounter in 'uCounter.pas';
 
 {$R *.res}
 
