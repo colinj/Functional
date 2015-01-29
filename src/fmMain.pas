@@ -73,15 +73,12 @@ uses
 
 procedure TForm6.Button1Click(Sender: TObject);
 var
-  R: TIntegerRange;
   I: TSequence<Integer, Integer>;
   J: Integer;
   S: string;
   I2: TSequence<Integer,Integer>;
 begin
-  R := TIntegerRange.Create(1, 200);
-  try
-    I := TSequence.From<Integer>(R);
+    I := TSequence.Range(1, 200);
 
     J := I.Fold<Integer>(
       function(X, Acc: Integer): Integer begin Result := Acc + X end, 0);
@@ -113,7 +110,7 @@ begin
     .TakeWhile(function(X: Integer): Boolean begin Result := X < 16 end)
     .ForEach(PrintNum);
 
-   I2 := TSequence.From<Integer>(R)
+   I2 := I
       .Filter(function(X: Integer): Boolean begin Result := X mod 3 = 0 end)
       .Map<Integer>(function(X: Integer): Integer begin Result := X * 5 end)
       .Filter(function(X: Integer): Boolean begin Result := X mod 2 = 0 end)
@@ -123,21 +120,17 @@ begin
 
     I2.ForEach(PrintNum);
 
-//    J := TSequence<Integer>(R)
+//    J := I
 //      .Map<Integer>(function(X: Integer): Integer begin Result := X end)
 //      .Take(5)
 //      .Fold(function(Acc, X: Integer): Integer begin Result := Acc + X end, 0);
 
-//    TSequence<Integer>(R)
+//    I
 //      .Map<string>(function(X: Integer): string begin Result := IntToStr(X) + ' numbers!' end)
 //      .Filter(function(S: string): Boolean begin Result := Copy(S, 1, 1) = '1' end)
 //      .Map<string>(function(X: string): string begin Result := Copy(X, 1, 5) end)
 //      .ForEach(procedure (S: string) begin Memo1.Lines.Add(S) end);
 
-
-  finally
-    R.Free;
-  end;
 end;
 
 procedure TForm6.Button2Click(Sender: TObject);
@@ -277,15 +270,14 @@ type
     Count: Integer;
     Sum: Double;
   end;
+const
+  ZERO_VAL: TEmpSummary = (Count: 0; Sum: 0);
 var
   EmpDS: TSequence<TDataSet, TDataSet>;
   Total: TEmpSummary;
   S: TList<string>;
   Item: string;
 begin
-  Total.Count := 0;
-  Total.Sum := 0;
-
   EmpDS := TSequence.From(ClientDataSet1)
     .Filter(function (D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency < 20000 end);
 
@@ -303,11 +295,11 @@ begin
 
   Total := EmpDS.Fold<TEmpSummary>(
     function(D: TDataSet; Acc: TEmpSummary): TEmpSummary
-                        begin
-                          Result.Count := Acc.Count + 1;
-                          Result.Sum := Acc.Sum + D.FieldByName('Salary').AsFloat;
-                        end, Total);
-  Memo1.Lines.Add(Format('Count=%d, Sum=%m, Avg=%n', [Total.Count, Total.Sum, Total.Sum/Total.Count]));
+    begin
+      Result.Count := Acc.Count + 1;
+      Result.Sum := Acc.Sum + D.FieldByName('Salary').AsFloat;
+    end, ZERO_VAL);
+  Memo1.Lines.Add(Format('Count=%d, Sum=%m', [Total.Count, Total.Sum]));
   Memo1.Lines.Add('-----------------');
 
   S := EmpDS

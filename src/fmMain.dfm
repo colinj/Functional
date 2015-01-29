@@ -19,7 +19,7 @@ object Form6: TForm6
     Top = 3
     Width = 167
     Height = 415
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alLeft
     TabOrder = 0
     object TabSheet2: TTabSheet
@@ -54,10 +54,6 @@ object Form6: TForm6
     end
     object TabSheet1: TTabSheet
       Caption = 'TSequence'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Button1: TButton
         Left = 32
         Top = 24
@@ -105,7 +101,7 @@ object Form6: TForm6
       end
       object Button9: TButton
         Left = 32
-        Top = 192
+        Top = 200
         Width = 75
         Height = 25
         Caption = 'Button9'
@@ -116,10 +112,6 @@ object Form6: TForm6
     object TabSheet5: TTabSheet
       Caption = 'DataSet'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Button10: TButton
         Left = 24
         Top = 20
@@ -193,14 +185,10 @@ object Form6: TForm6
       object TabSheet4: TTabSheet
         Caption = 'DataSet'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 391
-        ExplicitHeight = 0
         object DBGrid1: TDBGrid
           Left = 0
           Top = 0
-          Width = 671
+          Width = 473
           Height = 346
           Align = alClient
           DataSource = DataSource1

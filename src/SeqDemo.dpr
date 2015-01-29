@@ -6,7 +6,8 @@ uses
   uSequence in 'uSequence.pas',
   uRange in 'uRange.pas',
   uValue in 'uValue.pas',
-  uCounter in 'uCounter.pas';
+  uCounter in 'uCounter.pas',
+  uSequenceFunctions in 'uSequenceFunctions.pas';
 
 {$R *.res}
 
