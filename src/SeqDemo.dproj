@@ -77,9 +77,9 @@
 			<DCCReference Include="fmMain.pas">
 				<Form>Form6</Form>
 			</DCCReference>
-			<DCCReference Include="FunctionalLib.Sequence.pas"/>
-			<DCCReference Include="FunctionalLib.SequenceFunctions.pas"/>
-			<DCCReference Include="FunctionalLib.Value.pas"/>
+			<DCCReference Include="FuncLib.Sequence.pas"/>
+			<DCCReference Include="FuncLib.SequenceFunctions.pas"/>
+			<DCCReference Include="FuncLib.Value.pas"/>
 			<DCCReference Include="uRange.pas"/>
 			<DCCReference Include="uCounter.pas"/>
 			<BuildConfiguration Include="Debug">

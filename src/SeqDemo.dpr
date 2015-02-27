@@ -3,9 +3,9 @@ program SeqDemo;
 uses
   Forms,
   fmMain in 'fmMain.pas' {Form6},
-  FunctionalLib.Sequence in 'FunctionalLib.Sequence.pas',
-  FunctionalLib.SequenceFunctions in 'FunctionalLib.SequenceFunctions.pas',
-  FunctionalLib.Value in 'FunctionalLib.Value.pas',
+  FuncLib.Sequence in 'FuncLib.Sequence.pas',
+  FuncLib.SequenceFunctions in 'FuncLib.SequenceFunctions.pas',
+  FuncLib.Value in 'FuncLib.Value.pas',
   uRange in 'uRange.pas',
   uCounter in 'uCounter.pas';
 

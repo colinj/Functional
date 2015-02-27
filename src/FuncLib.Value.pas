@@ -1,6 +1,6 @@
 {****************************************************}
 {                                                    }
-{  FunctionalLib                                     }
+{  Delphi Functional Library                         }
 {                                                    }
 {  Copyright (C) 2015 Colin Johnsun                  }
 {                                                    }
@@ -17,7 +17,7 @@
 {                                                    }
 {****************************************************}
 
-unit FunctionalLib.Value;
+unit FuncLib.Value;
 
 interface
 

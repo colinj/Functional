@@ -17,7 +17,7 @@ object Form6: TForm6
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 167
+    Width = 198
     Height = 415
     ActivePage = TabSheet1
     Align = alLeft
@@ -25,6 +25,7 @@ object Form6: TForm6
     object TabSheet2: TTabSheet
       Caption = 'Counter'
       ImageIndex = 1
+      ExplicitWidth = 159
       object Button6: TButton
         Left = 16
         Top = 16
@@ -54,6 +55,7 @@ object Form6: TForm6
     end
     object TabSheet1: TTabSheet
       Caption = 'TSequence'
+      ExplicitWidth = 159
       object Button1: TButton
         Left = 32
         Top = 24
@@ -112,6 +114,7 @@ object Form6: TForm6
     object TabSheet5: TTabSheet
       Caption = 'DataSet'
       ImageIndex = 2
+      ExplicitWidth = 159
       object Button10: TButton
         Left = 24
         Top = 20
@@ -133,25 +136,28 @@ object Form6: TForm6
     end
   end
   object Panel1: TPanel
-    Left = 173
+    Left = 204
     Top = 0
-    Width = 489
+    Width = 458
     Height = 421
     Align = alClient
     Caption = 'Panel1'
     TabOrder = 1
+    ExplicitLeft = 173
+    ExplicitWidth = 489
     object Panel2: TPanel
       Left = 1
       Top = 381
-      Width = 487
+      Width = 456
       Height = 39
       Align = alBottom
       TabOrder = 0
+      ExplicitWidth = 487
       DesignSize = (
-        487
+        456
         39)
       object Button8: TButton
-        Left = 379
+        Left = 348
         Top = 3
         Width = 95
         Height = 25
@@ -159,36 +165,41 @@ object Form6: TForm6
         Caption = 'Clear'
         TabOrder = 0
         OnClick = Button8Click
+        ExplicitLeft = 379
       end
     end
     object PageControl2: TPageControl
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 481
+      Width = 450
       Height = 374
       ActivePage = TabSheet3
       Align = alClient
       TabOrder = 1
+      ExplicitWidth = 481
       object TabSheet3: TTabSheet
         Caption = 'Log'
+        ExplicitWidth = 473
         object Memo1: TMemo
           Left = 0
           Top = 0
-          Width = 473
+          Width = 442
           Height = 346
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
+          ExplicitWidth = 473
         end
       end
       object TabSheet4: TTabSheet
         Caption = 'DataSet'
         ImageIndex = 1
+        ExplicitWidth = 473
         object DBGrid1: TDBGrid
           Left = 0
           Top = 0
-          Width = 473
+          Width = 442
           Height = 346
           Align = alClient
           DataSource = DataSource1

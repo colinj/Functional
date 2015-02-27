@@ -1,6 +1,6 @@
 {****************************************************}
 {                                                    }
-{  FunctionalLib                                     }
+{  Delphi Functional Library                         }
 {                                                    }
 {  Copyright (C) 2015 Colin Johnsun                  }
 {                                                    }
@@ -17,14 +17,14 @@
 {                                                    }
 {****************************************************}
 
-unit FunctionalLib.SequenceFunctions;
+unit FuncLib.SequenceFunctions;
 
 interface
 
 uses
   SysUtils, Classes,
   Generics.Collections,
-  FunctionalLib.Value;
+  FuncLib.Value;
 
 type
   TValueFunc<T, U> = reference to function (Item: TValue<T>): TValue<U>;

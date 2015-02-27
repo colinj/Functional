@@ -67,7 +67,7 @@ implementation
 uses
   DateUtils,
   Generics.Collections,
-  FunctionalLib.Sequence,
+  FuncLib.Sequence,
   uCounter;
 
 { TForm6 }

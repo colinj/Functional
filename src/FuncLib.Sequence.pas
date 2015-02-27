@@ -1,6 +1,6 @@
 {****************************************************}
 {                                                    }
-{  FunctionalLib                                     }
+{  Delphi Functional Library                         }
 {                                                    }
 {  Copyright (C) 2015 Colin Johnsun                  }
 {                                                    }
@@ -17,7 +17,7 @@
 {                                                    }
 {****************************************************}
 
-unit FunctionalLib.Sequence;
+unit FuncLib.Sequence;
 
 interface
 
@@ -25,8 +25,8 @@ uses
   SysUtils, Classes,
   Generics.Collections,
   DB,
-  FunctionalLib.Value,
-  FunctionalLib.SequenceFunctions;
+  FuncLib.Value,
+  FuncLib.SequenceFunctions;
 
 type
   TSequence<T, U> = record
@@ -48,7 +48,7 @@ type
 
   TSequence = record
   public
-	class function Identity<T>(Item: TValue<T>): TValue<T>;
+    class function Identity<T>(Item: TValue<T>): TValue<T>; static;
     class function From<T>(const aArray: TArray<T>): TSequence<T, T>; overload; static;
     class function From<T>(const aEnumerable: TEnumerable<T>): TSequence<T, T>; overload; static;
     class function From(const aString: string): TSequence<Char, Char>; overload; static;
@@ -123,7 +123,7 @@ end;
 
 class function TSequence.Identity<T>(Item: TValue<T>): TValue<T>;
 begin
-	Result := Item;
+  Result := Item;
 end;
 
 class function TSequence.From<T>(const aArray: TArray<T>): TSequence<T, T>;
