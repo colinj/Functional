@@ -56,6 +56,23 @@ type
     class function From(const aDataset: TDataSet): TSequence<TDataSet, TDataSet>; overload; static;
     class function Range(const aStart, aFinish: Integer): TSequence<Integer, Integer>; static;
   end;
+//
+//  TSequence<Int, U> = record
+//  private
+//    FFunc: TValueFunc<Int, U>;
+//    FIterate: TIteratorProc<Int>;
+//  public
+//    constructor Create(const aIterator: TIteratorProc<Int>; const aFunc: TValueFunc<Int, U>);
+//    function Filter(const aPredicate: TPredicate<U>): TSequence<Int, U>;
+////    function Map<TResult>(const aMapper: TFunc<U, TResult>): TSequence<Int, TResult>;
+////    function Take(const aCount: Integer): TSequence<Int, U>;
+////    function Skip(const aCount: Integer): TSequence<Int, U>;
+////    function TakeWhile(const aPredicate: TPredicate<U>): TSequence<Int, U>;
+////    function SkipWhile(const aPredicate: TPredicate<U>): TSequence<Int, U>;
+//    function Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
+////    function ToList: TList<U>;
+//    procedure ForEach(const aAction: TProc<U>);
+//  end;
 
 implementation
 
@@ -75,12 +92,29 @@ end;
 
 function TSequence<T, U>.Fold<TResult>(const aFoldFunc: TFoldFunc<U, TResult>; const aInitVal: TResult): TResult;
 var
-  FinalValue: TResult;
+  OrigFunc: TValueFunc<T, U>;
+  Accumulator: TResult;
 begin
+  OrigFunc := FFunc;
+
+  Accumulator := aInitVal;
+
   FFunc(TValue<T>.Start);
-  FIterate(TSeqFunction<T, U>.CreateFold<TResult>(FFunc, aFoldFunc, aInitVal,
-    procedure (aFinalValue: TResult) begin FinalValue := aFinalValue end));
-  Result := FinalValue;
+  FIterate(
+    function (Item: T): Boolean
+    var
+      R: TValue<U>;
+    begin
+      Result := False;
+      R := OrigFunc(TValue<T>(Item));
+      case R.State of
+        vsSomething: Accumulator := aFoldFunc(R.Value, Accumulator);
+        vsFinish: Result := True;
+      end;
+    end
+  );
+
+  Result := Accumulator;
 end;
 
 function TSequence<T, U>.Filter(const aPredicate: TPredicate<U>): TSequence<T, U>;

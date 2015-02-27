@@ -300,7 +300,7 @@ begin
       Result.Count := Acc.Count + 1;
       Result.Sum := Acc.Sum + D.FieldByName('Salary').AsFloat;
     end, ZERO_VAL);
-  Memo1.Lines.Add(Format('Count=%d, Sum=%m', [Total.Count, Total.Sum]));
+  Memo1.Lines.Add(Format('Count=%d, Sum=%m, Avg=%f', [Total.Count, Total.Sum, Total.Sum/Total.Count]));
   Memo1.Lines.Add('-----------------');
 
   S := EmpDS

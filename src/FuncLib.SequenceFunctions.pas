@@ -40,8 +40,6 @@ type
     class function CreateTakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
     class function CreateSkipWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
 	
-    class function CreateFold<TResult>(const aOrigFunc: TValueFunc<T, U>; const aFoldFunc: TFoldFunc<U, TResult>;
-      const aInitVal: TResult; const aCaptureVal: TProc<TResult>): TPredicate<T>; static;
     class function CreateAction(const aOrigFunc: TValueFunc<T, U>; const  aAction: TProc<U>): TPredicate<T>; static;
     class function CreateAddItem(const aOrigFunc: TValueFunc<T, U>; const aList: TList<U>): TPredicate<T>; static;
   end;
@@ -182,31 +180,6 @@ begin
       Result := aOrigFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then
         Result := TValue<U>.Finish;
-    end;
-end;
-
-class function TSeqFunction<T, U>.CreateFold<TResult>(const aOrigFunc: TValueFunc<T, U>; const aFoldFunc: TFoldFunc<U, TResult>;
-  const aInitVal: TResult; const aCaptureVal: TProc<TResult>): TPredicate<T>;
-var
-  Accumulator: TResult;
-begin
-  Accumulator := aInitVal;
-
-  Result :=
-    function (Item: T): Boolean
-    var
-      R: TValue<U>;
-    begin
-      Result := False;
-      R := aOrigFunc(TValue<T>(Item));
-      case R.State of
-        vsSomething: Accumulator := aFoldFunc(R.Value, Accumulator);
-        vsFinish:
-          begin
-            aCaptureVal(Accumulator);
-            Result := True;
-          end;
-      end;
     end;
 end;
 

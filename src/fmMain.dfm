@@ -19,7 +19,7 @@ object Form6: TForm6
     Top = 3
     Width = 198
     Height = 415
-    ActivePage = TabSheet1
+    ActivePage = TabSheet5
     Align = alLeft
     TabOrder = 0
     object TabSheet2: TTabSheet
