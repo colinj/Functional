@@ -25,7 +25,7 @@ uses
   SysUtils, Classes;
 
 type
-  TValueState = (vsStart, vsSomething, vsNothing, vsStop);
+  TValueState = (vsStart, vsSomething, vsNothing, vsFinish);
 
   TValue<T> = record
   private
@@ -35,7 +35,7 @@ type
     class operator Implicit(const aValue: T): TValue<T>;
     class function Nothing: TValue<T>; static;
     class function Start: TValue<T>; static;
-    class function Stop: TValue<T>; static;
+    class function Finish: TValue<T>; static;
     function IsSomething: Boolean;
     procedure SetState(const aState: TValueState);
     property Value: T read FValue;
@@ -72,9 +72,9 @@ begin
   Result.FState := vsStart;
 end;
 
-class function TValue<T>.Stop: TValue<T>;
+class function TValue<T>.Finish: TValue<T>;
 begin
-  Result.FState := vsStop;
+  Result.FState := vsFinish;
 end;
 
 end.

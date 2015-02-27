@@ -79,7 +79,7 @@ begin
   FFunc(TValue<T>.Start);
   FIterate(TSeqFunction<T, U>.CreateFold<TResult>(FFunc, aFoldFunc, aInitVal,
     procedure (aFinalValue: TResult) begin FinalValue := aFinalValue end));
-//  FFunc(TValue<T>.Stop);
+//  FFunc(TValue<T>.Finish);
   Result := FinalValue;
 end;
 

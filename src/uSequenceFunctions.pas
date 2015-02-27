@@ -58,7 +58,7 @@ begin
       R := aPrevFunc(TValue<T>(Item));
       case R.State of
         vsSomething: aAction(R.Value);
-        vsStop: Result := False;
+        vsFinish: Result := False;
       end;
     end;
 end;
@@ -77,7 +77,7 @@ begin
       R := aPrevFunc(TValue<T>(Item));
       if R.IsSomething then
         ItemList.Add(R.Value);
-      Result := R.State <> vsStop;
+      Result := R.State <> vsFinish;
     end;
 end;
 
@@ -161,7 +161,7 @@ begin
     begin
       if Counter = aCount then
         begin
-          Result := TValue<U>.Stop;
+          Result := TValue<U>.Finish;
           Exit;
         end;
 
@@ -180,7 +180,7 @@ begin
     begin
       Result := aPrevFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then
-        Result := TValue<U>.Stop;
+        Result := TValue<U>.Finish;
     end;
 end;
 
@@ -200,7 +200,7 @@ begin
       R := aPrevFunc(TValue<T>(Item));
       case R.State of
         vsSomething: Accumulator := aFoldFunc(R.Value, Accumulator);
-        vsStop:
+        vsFinish:
           begin
             aCaptureVal(Accumulator);
             Result := False;
