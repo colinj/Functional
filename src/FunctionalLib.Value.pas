@@ -17,7 +17,7 @@
 {                                                    }
 {****************************************************}
 
-unit uValue;
+unit FunctionalLib.Value;
 
 interface
 

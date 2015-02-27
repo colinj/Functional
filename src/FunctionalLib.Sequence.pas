@@ -17,7 +17,7 @@
 {                                                    }
 {****************************************************}
 
-unit uSequence;
+unit FunctionalLib.Sequence;
 
 interface
 
@@ -25,8 +25,8 @@ uses
   SysUtils, Classes,
   Generics.Collections,
   DB,
-  uValue,
-  uSequenceFunctions;
+  FunctionalLib.Value,
+  FunctionalLib.SequenceFunctions;
 
 type
   TSequence<T, U> = record
@@ -48,6 +48,7 @@ type
 
   TSequence = record
   public
+	class function Identity<T>(Item: TValue<T>): TValue<T>;
     class function From<T>(const aArray: TArray<T>): TSequence<T, T>; overload; static;
     class function From<T>(const aEnumerable: TEnumerable<T>): TSequence<T, T>; overload; static;
     class function From(const aString: string): TSequence<Char, Char>; overload; static;
@@ -79,7 +80,6 @@ begin
   FFunc(TValue<T>.Start);
   FIterate(TSeqFunction<T, U>.CreateFold<TResult>(FFunc, aFoldFunc, aInitVal,
     procedure (aFinalValue: TResult) begin FinalValue := aFinalValue end));
-//  FFunc(TValue<T>.Finish);
   Result := FinalValue;
 end;
 
@@ -121,82 +121,67 @@ end;
 
 { TSequence }
 
+class function TSequence.Identity<T>(Item: TValue<T>): TValue<T>;
+begin
+	Result := Item;
+end;
+
 class function TSequence.From<T>(const aArray: TArray<T>): TSequence<T, T>;
 begin
   Result := TSequence<T, T>.Create(
-    procedure (P: TPredicate<T>)
+    procedure (StopOn: TPredicate<T>)
     var
       Item: T;
     begin
       for Item in aArray do
-        if not P(Item) then
-          Break;
-    end
-    ,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      Result := Item;
-    end);
+        if StopOn(Item) then Break;
+    end,
+    Identity<T>);
 end;
 
 class function TSequence.From<T>(const aEnumerable: TEnumerable<T>): TSequence<T, T>;
 begin
   Result := TSequence<T, T>.Create(
-    procedure (P: TPredicate<T>)
+    procedure (StopOn: TPredicate<T>)
     var
       Item: T;
     begin
       for Item in aEnumerable do
-        if not P(Item) then
-          Break;
-    end
-    ,
-    function (Item: TValue<T>): TValue<T>
-    begin
-      Result := Item;
-    end);
+        if StopOn(Item) then Break;
+    end,
+    Identity<T>);
 end;
 
 class function TSequence.From(const aString: string): TSequence<Char, Char>;
 begin
   Result := TSequence<Char, Char>.Create(
-    procedure (P: TPredicate<Char>)
+    procedure (StopOn: TPredicate<Char>)
     var
       Item: Char;
     begin
       for Item in aString do
-        if not P(Item) then
-          Break;
-    end
-    ,
-    function (Item: TValue<Char>): TValue<Char>
-    begin
-      Result := Item;
-    end);
+        if StopOn(Item) then Break;
+    end,
+    Identity<Char>);
 end;
 
 class function TSequence.From(const aStrings: TStrings): TSequence<string, string>;
 begin
   Result := TSequence<string, string>.Create(
-    procedure (P: TPredicate<string>)
+    procedure (StopOn: TPredicate<string>)
     var
       Item: string;
     begin
       for Item in aStrings do
-        if not P(Item) then
-          Break;
-    end
-    ,
-    function (Item: TValue<string>): TValue<string>
-    begin
-      Result := Item;
-    end);
+        if StopOn(Item) then Break;
+    end,
+    Identity<string>);
 end;
 
 class function TSequence.From(const aDataset: TDataSet): TSequence<TDataSet, TDataSet>;
 begin
   Result := TSequence<TDataSet, TDataSet>.Create(
-    procedure (P: TPredicate<TDataSet>)
+    procedure (StopOn: TPredicate<TDataSet>)
     var
       D: TDataSet;
     begin
@@ -204,34 +189,24 @@ begin
       D.First;
       while not D.Eof do
       begin
-        if not P(D) then
-          Break;
+        if StopOn(D) then Break;
         D.Next;
       end;
-    end
-    ,
-    function (Item: TValue<TDataSet>): TValue<TDataSet>
-    begin
-      Result := Item;
-    end);
+    end,
+    Identity<TDataSet>);
 end;
 
 class function TSequence.Range(const aStart, aFinish: Integer): TSequence<Integer, Integer>;
 begin
   Result := TSequence<Integer, Integer>.Create(
-    procedure (P: TPredicate<Integer>)
+    procedure (StopOn: TPredicate<Integer>)
     var
       Item: Integer;
     begin
       for Item := aStart to aFinish do
-        if not P(Item) then
-          Break;
-    end
-    ,
-    function (Item: TValue<Integer>): TValue<Integer>
-    begin
-      Result := Item;
-    end);
+        if StopOn(Item) then Break;
+    end,
+    Identity<Integer>);
 end;
 
 end.

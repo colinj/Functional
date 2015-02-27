@@ -3,11 +3,11 @@ program SeqDemo;
 uses
   Forms,
   fmMain in 'fmMain.pas' {Form6},
-  uSequence in 'uSequence.pas',
+  FunctionalLib.Sequence in 'FunctionalLib.Sequence.pas',
+  FunctionalLib.SequenceFunctions in 'FunctionalLib.SequenceFunctions.pas',
+  FunctionalLib.Value in 'FunctionalLib.Value.pas',
   uRange in 'uRange.pas',
-  uValue in 'uValue.pas',
-  uCounter in 'uCounter.pas',
-  uSequenceFunctions in 'uSequenceFunctions.pas';
+  uCounter in 'uCounter.pas';
 
 {$R *.res}
 
