@@ -19,13 +19,16 @@ object Form6: TForm6
     Top = 3
     Width = 198
     Height = 415
-    ActivePage = TabSheet5
+    ActivePage = TabSheet1
     Align = alLeft
     TabOrder = 0
     object TabSheet2: TTabSheet
       Caption = 'Counter'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 159
+      ExplicitHeight = 0
       object Button6: TButton
         Left = 16
         Top = 16
@@ -55,7 +58,6 @@ object Form6: TForm6
     end
     object TabSheet1: TTabSheet
       Caption = 'TSequence'
-      ExplicitWidth = 159
       object Button1: TButton
         Left = 32
         Top = 24
@@ -114,7 +116,6 @@ object Form6: TForm6
     object TabSheet5: TTabSheet
       Caption = 'DataSet'
       ImageIndex = 2
-      ExplicitWidth = 159
       object Button10: TButton
         Left = 24
         Top = 20
@@ -143,8 +144,6 @@ object Form6: TForm6
     Align = alClient
     Caption = 'Panel1'
     TabOrder = 1
-    ExplicitLeft = 173
-    ExplicitWidth = 489
     object Panel2: TPanel
       Left = 1
       Top = 381
@@ -152,7 +151,6 @@ object Form6: TForm6
       Height = 39
       Align = alBottom
       TabOrder = 0
-      ExplicitWidth = 487
       DesignSize = (
         456
         39)
@@ -165,7 +163,6 @@ object Form6: TForm6
         Caption = 'Clear'
         TabOrder = 0
         OnClick = Button8Click
-        ExplicitLeft = 379
       end
     end
     object PageControl2: TPageControl
@@ -177,10 +174,8 @@ object Form6: TForm6
       ActivePage = TabSheet3
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 481
       object TabSheet3: TTabSheet
         Caption = 'Log'
-        ExplicitWidth = 473
         object Memo1: TMemo
           Left = 0
           Top = 0
@@ -189,13 +184,11 @@ object Form6: TForm6
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
-          ExplicitWidth = 473
         end
       end
       object TabSheet4: TTabSheet
         Caption = 'DataSet'
         ImageIndex = 1
-        ExplicitWidth = 473
         object DBGrid1: TDBGrid
           Left = 0
           Top = 0

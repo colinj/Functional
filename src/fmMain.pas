@@ -74,12 +74,12 @@ uses
 
 procedure TForm6.Button1Click(Sender: TObject);
 var
-  I: TSequence<Integer, Integer>;
+  I: TSeq<Integer, Integer>;
   J: Integer;
   S: string;
-  I2: TSequence<Integer,Integer>;
+  I2: TSeq<Integer,Integer>;
 begin
-    I := TSequence.Range(1, 200);
+    I := TSeq.Range(1, 200);
 
     J := I.Fold<Integer>(
       function(X, Acc: Integer): Integer begin Result := Acc + X end, 0);
@@ -138,7 +138,7 @@ procedure TForm6.Button2Click(Sender: TObject);
 var
   C: Char;
   S: string;
-  I: TSequence<Char, Char>;
+  I: TSeq<Char, Char>;
   CA: array[0..10] of Char;
   CA2: TArray<Char>;
   CL: TList<Char>;
@@ -151,7 +151,7 @@ begin
 //  CL := TList<Char>.Create;
 //  try
 //    CL.AddRange(CA);
-//    I := TSequence<Char>.From(CL);
+//    I := TSeq<Char>.From(CL);
 //    I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 //  finally
 //    CL.Free;
@@ -161,13 +161,13 @@ begin
   for J := 1 to Length(S) do
     CA2[J - 1] := S[J];
 
-  I := TSequence.From<Char>(CA2);
+  I := TSeq.From<Char>(CA2);
   I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
-  I := TSequence.From(S);
+  I := TSeq.From(S);
   I.ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 
-  TSequence.From(S).ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
+  TSeq.From(S).ForEach(procedure (C: Char) begin Memo1.Lines.Add(C) end);
 end;
 
 procedure TForm6.Button3Click(Sender: TObject);
@@ -208,8 +208,8 @@ begin
   try
     S.CommaText := 'cat,dog,mouse,horse,pig,bear,goat,cow,sheep,rabbit,lion,tiger,cougar,snake';
 
-    TSequence.From(S)
-//      .Filter(function (X: string): Boolean begin Result := Copy(X, 1, 1) = 'c' end)
+    TSeq.From(S)
+      .Filter(function (X: string): Boolean begin Result := Copy(X, 1, 1) = 'c' end)
       .ForEach(procedure (X: string) begin Memo1.Lines.Add(X) end);
   finally
     S.Free;
@@ -235,7 +235,7 @@ var
   Detail: TEmpDetail;
 
 begin
-  EmpList := TSequence.From(ClientDataSet1)
+  EmpList := TSeq.From(ClientDataSet1)
     .Filter(BySalary)
     .Map<TEmpDetail>(ToEmpRecord)
     .ToList;
@@ -274,12 +274,12 @@ type
 const
   ZERO_VAL: TEmpSummary = (Count: 0; Sum: 0);
 var
-  EmpDS: TSequence<TDataSet, TDataSet>;
+  EmpDS: TSeq<TDataSet, TDataSet>;
   Total: TEmpSummary;
   S: TList<string>;
   Item: string;
 begin
-  EmpDS := TSequence.From(ClientDataSet1)
+  EmpDS := TSeq.From(ClientDataSet1)
     .Filter(function (D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency < 20000 end);
 
   EmpDS
