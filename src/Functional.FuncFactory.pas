@@ -17,36 +17,36 @@
 {                                                    }
 {****************************************************}
 
-unit FuncLib.SequenceFunctions;
+unit Functional.FuncFactory;
 
 interface
 
 uses
   SysUtils, Classes,
   Generics.Collections,
-  FuncLib.Value;
+  Functional.Value;
 
 type
   TValueFunc<T, U> = reference to function (Item: TValue<T>): TValue<U>;
   TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
   TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
 
-  TSeqFunction<T, U> = record
+  TFuncFactory<T, U> = record
   public
-    class function CreateFilter(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
-    class function CreateMap<TResult>(const aOrigFunc: TValueFunc<T, U>; const aMapper: TFunc<U, TResult>): TValueFunc<T, TResult>; static;
-    class function CreateTake(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>; static;
-    class function CreateSkip(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>; static;
-    class function CreateTakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
-    class function CreateSkipWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
-	
-    class function CreateAction(const aOrigFunc: TValueFunc<T, U>; const  aAction: TProc<U>): TPredicate<T>; static;
-    class function CreateAddItem(const aOrigFunc: TValueFunc<T, U>; const aList: TList<U>): TPredicate<T>; static;
+    class function Filter(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
+    class function Map<TResult>(const aOrigFunc: TValueFunc<T, U>; const aMapper: TFunc<U, TResult>): TValueFunc<T, TResult>; static;
+    class function Take(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>; static;
+    class function Skip(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>; static;
+    class function TakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
+    class function SkipWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>; static;
+
+    class function ForEach(const aOrigFunc: TValueFunc<T, U>; const  aAction: TProc<U>): TPredicate<T>; static;
+    class function AddItem(const aOrigFunc: TValueFunc<T, U>; const aList: TList<U>): TPredicate<T>; static;
   end;
 
 implementation
 
-class function TSeqFunction<T, U>.CreateAction(const aOrigFunc: TValueFunc<T, U>; const aAction: TProc<U>): TPredicate<T>;
+class function TFuncFactory<T, U>.ForEach(const aOrigFunc: TValueFunc<T, U>; const aAction: TProc<U>): TPredicate<T>;
 begin
   Result :=
     function (Item: T): Boolean
@@ -62,7 +62,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateAddItem(const aOrigFunc: TValueFunc<T, U>; const aList: TList<U>): TPredicate<T>;
+class function TFuncFactory<T, U>.AddItem(const aOrigFunc: TValueFunc<T, U>; const aList: TList<U>): TPredicate<T>;
 var
   ItemList: TList<U>;
 begin
@@ -80,7 +80,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateFilter(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
+class function TFuncFactory<T, U>.Filter(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
 begin
   Result :=
     function (Item: TValue<T>): TValue<U>
@@ -91,7 +91,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateMap<TResult>(const aOrigFunc: TValueFunc<T, U>; const aMapper: TFunc<U, TResult>): TValueFunc<T, TResult>;
+class function TFuncFactory<T, U>.Map<TResult>(const aOrigFunc: TValueFunc<T, U>; const aMapper: TFunc<U, TResult>): TValueFunc<T, TResult>;
 begin
   Result :=
     function (Item: TValue<T>): TValue<TResult>
@@ -106,7 +106,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateSkip(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>;
+class function TFuncFactory<T, U>.Skip(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>;
 var
   Counter: Integer;
 begin
@@ -126,7 +126,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateSkipWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
+class function TFuncFactory<T, U>.SkipWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
 var
   Skipping: Boolean;
 begin
@@ -151,7 +151,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateTake(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>;
+class function TFuncFactory<T, U>.Take(const aOrigFunc: TValueFunc<T, U>; const aCount: Integer): TValueFunc<T, U>;
 var
   Counter: Integer;
 begin
@@ -172,7 +172,7 @@ begin
     end;
 end;
 
-class function TSeqFunction<T, U>.CreateTakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
+class function TFuncFactory<T, U>.TakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
 begin
   Result :=
     function (Item: TValue<T>): TValue<U>

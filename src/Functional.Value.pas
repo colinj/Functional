@@ -17,7 +17,7 @@
 {                                                    }
 {****************************************************}
 
-unit FuncLib.Value;
+unit Functional.Value;
 
 interface
 
