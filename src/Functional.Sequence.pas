@@ -36,8 +36,10 @@ type
   public
     function Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Where(const aPredicate: TPredicate<U>): TSeq<T, U>; // synonym for Filter function
-    function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
-    function Select<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>; // synonym for Map function
+    function Map(const aMapper: TFunc<U, U>): TSeq<T, U>; overload;
+    function Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>; overload;
+    function Select(const aMapper: TFunc<U, U>): TSeq<T, U>; overload; // synonum for Map function
+    function Select<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>; overload; // synonym for Map function
     function Take(const aCount: Integer): TSeq<T, U>;
     function Skip(const aCount: Integer): TSeq<T, U>;
     function TakeWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
@@ -73,10 +75,21 @@ begin
   Result := Filter(aPredicate);
 end;
 
+function TSeq<T, U>.Map(const aMapper: TFunc<U, U>): TSeq<T, U>;
+begin
+  Result.FFunc := TFuncFactory<T, U>.Map<U>(FFunc, aMapper);
+  Result.FIterate := FIterate;
+end;
+
 function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
 begin
   Result.FFunc := TFuncFactory<T, U>.Map<TResult>(FFunc, aMapper);
   Result.FIterate := FIterate;
+end;
+
+function TSeq<T, U>.Select(const aMapper: TFunc<U, U>): TSeq<T, U>;
+begin
+  Result := Map(aMapper);
 end;
 
 function TSeq<T, U>.Select<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;

@@ -136,7 +136,7 @@ begin
 
   PrintHeader('Select (add 12) returning an integer');
   Seq
-    .Select<Integer>(
+    .Select(
       function(I: Integer): Integer
       begin
         Result := I + 12;
@@ -175,7 +175,7 @@ begin
 
   PrintHeader('Select (add 12) - returning an integer');
   Seq
-    .Select<Integer>(Add12)
+    .Map(Add12)
     .ForEach(PrintNum);
 
   PrintHeader('Select (add 12) returning a string');
