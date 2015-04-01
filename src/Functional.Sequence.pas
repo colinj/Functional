@@ -144,7 +144,7 @@ begin
   OrigFunc(TValue<T>.Start);
 
   FIterate(
-    function (Item: T): Boolean
+    function (const Item: T): Boolean
     var
       R: TValue<U>;
     begin

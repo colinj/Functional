@@ -27,6 +27,7 @@ uses
   Functional.Value;
 
 type
+  TPredicate<T> = reference to function (const Arg1: T): Boolean;
   TValueFunc<T, U> = reference to function (const Item: TValue<T>): TValue<U>;
   TIteratorProc<T> = reference to procedure (const P: TPredicate<T>);
   TFoldFunc<T, U> = reference to function (const Item: T; const Acc: U): U;
@@ -49,7 +50,7 @@ implementation
 class function TFuncFactory<T, U>.ForEach(const aOrigFunc: TValueFunc<T, U>; const aAction: TProc<U>): TPredicate<T>;
 begin
   Result :=
-    function (Item: T): Boolean
+    function (const Item: T): Boolean
     var
       R: TValue<U>;
     begin
@@ -69,7 +70,7 @@ begin
   ItemList := aList;
 
   Result :=
-    function (Item: T): Boolean
+    function (const Item: T): Boolean
     var
       R: TValue<U>;
     begin

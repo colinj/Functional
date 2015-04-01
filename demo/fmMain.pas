@@ -110,7 +110,7 @@ begin
   PrintDone;
 end;
 
-function IsEven(I: Integer): Boolean;
+function IsEven(const I: Integer): Boolean;
 begin
   Result := I mod 2 = 0;
 end;
@@ -224,13 +224,13 @@ begin
 
   PrintHeader('TakeWhile value of item < 7');
   Seq
-    .TakeWhile(function(Item: Integer): Boolean begin Result := Item < 7 end)
+    .TakeWhile(function(const Item: Integer): Boolean begin Result := Item < 7 end)
     .ForEach(PrintNum);
 
   PrintHeader('Skip first 2 items then TakeWhile item value < 9');
   Seq
     .Skip(2)
-    .TakeWhile(function(Item: Integer): Boolean begin Result := Item < 9 end)
+    .TakeWhile(function(const Item: Integer): Boolean begin Result := Item < 9 end)
     .ForEach(PrintNum);
 
   PrintDone;
@@ -247,12 +247,12 @@ begin
 
   PrintHeader('SkipWhile value of item <= 3');
   Seq
-    .SkipWhile(function (Item: Integer): Boolean begin Result := Item <= 3 end)
+    .SkipWhile(function (const Item: Integer): Boolean begin Result := Item <= 3 end)
     .ForEach(PrintNum);
 
   PrintHeader('SkipWhile item value < 5 then Take the next 3 items');
   Seq
-    .SkipWhile(function (Item: Integer): Boolean begin Result := Item < 5 end)
+    .SkipWhile(function (const Item: Integer): Boolean begin Result := Item < 5 end)
     .Take(3)
     .ForEach(PrintNum);
 
@@ -261,7 +261,7 @@ begin
     function (Num: Integer): TPredicate<Integer>
     begin
       Result :=
-        function(I: Integer): Boolean
+        function(const I: Integer): Boolean
         begin
           Result := I < Num;
         end;
@@ -338,12 +338,12 @@ begin
 
   PrintHeader('Filter for vowels only');
   TSeq.From(S)
-    .Filter(function (C: Char): Boolean begin Result := CharInSet(C, VOWELS); end)
+    .Filter(function (const C: Char): Boolean begin Result := CharInSet(C, VOWELS); end)
     .ForEach(procedure (C: Char) begin PrintStr('The character = ''%s''', [C]) end);
 
   PrintHeader('Filter for consonants and captalise');
   TSeq.From(S)
-    .Filter(function (C: Char): Boolean begin Result := CharInSet(C, ALPHA_CHARS) and not CharInSet(C, VOWELS); end)
+    .Filter(function (const C: Char): Boolean begin Result := CharInSet(C, ALPHA_CHARS) and not CharInSet(C, VOWELS); end)
     .Map<Char>(function (C: Char): Char begin Result := UpCase(C) end)
     .ForEach(procedure (C: Char) begin PrintStr('The character = ''%s''', [C]) end);
 
@@ -367,7 +367,7 @@ begin
 
     PrintHeader('Filter for strings starting with ''c''');
     TSeq.From(Animals)
-      .Filter(function (S: string): Boolean begin Result := Copy(S, 1, 1) = 'c' end)
+      .Filter(function (const S: string): Boolean begin Result := Copy(S, 1, 1) = 'c' end)
       .ForEach(PrintStr);
   finally
     Animals.Free;
@@ -376,12 +376,12 @@ begin
   PrintDone;
 end;
 
-function BySalary(D: TDataSet): Boolean;
+function BySalary(const D: TDataSet): Boolean;
 begin
   Result := D.FieldByName('Salary').AsCurrency < 25000
 end;
 
-function ToEmpRecord(D: TDataSet):TEmpDetail;
+function ToEmpRecord(D: TDataSet): TEmpDetail;
 begin
   Result.Name := D.FieldByName('FirstName').AsString + ' ' +
     D.FieldByName('LastName').AsString;
@@ -440,7 +440,7 @@ var
   Item: string;
 begin
   EmpDS := TSeq.From(ClientDataSet1)
-    .Filter(function (D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency < 20000 end);
+    .Filter(function (const D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency < 20000 end);
 
   EmpDS
     .ForEach( procedure(D: TDataSet)
