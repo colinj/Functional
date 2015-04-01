@@ -51,7 +51,7 @@ type
 
   TSeq = record
   public
-    class function Identity<T>(Item: TValue<T>): TValue<T>; static;
+    class function Identity<T>(const Item: TValue<T>): TValue<T>; static;
     class function From<T>(const aArray: TArray<T>): TSeq<T, T>; overload; static;
     class function From<T>(const aEnumerable: TEnumerable<T>): TSeq<T, T>; overload; static;
     class function From(const aString: string): TSeq<Char, Char>; overload; static;
@@ -162,7 +162,7 @@ end;
 
 { TSeq }
 
-class function TSeq.Identity<T>(Item: TValue<T>): TValue<T>;
+class function TSeq.Identity<T>(const Item: TValue<T>): TValue<T>;
 begin
   Result := Item;
 end;
@@ -171,7 +171,7 @@ class function TSeq.From<T>(const aArray: TArray<T>): TSeq<T, T>;
 begin
   Result.FFunc := Identity<T>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<T>)
+    procedure (const StopOn: TPredicate<T>)
     var
       Item: T;
     begin
@@ -184,7 +184,7 @@ class function TSeq.From<T>(const aEnumerable: TEnumerable<T>): TSeq<T, T>;
 begin
   Result.FFunc := Identity<T>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<T>)
+    procedure (const StopOn: TPredicate<T>)
     var
       Item: T;
     begin
@@ -197,7 +197,7 @@ class function TSeq.From(const aString: string): TSeq<Char, Char>;
 begin
   Result.FFunc := Identity<Char>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<Char>)
+    procedure (const StopOn: TPredicate<Char>)
     var
       Item: Char;
     begin
@@ -210,7 +210,7 @@ class function TSeq.From(const aStrings: TStrings): TSeq<string, string>;
 begin
   Result.FFunc := Identity<string>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<string>)
+    procedure (const StopOn: TPredicate<string>)
     var
       Item: string;
     begin
@@ -223,7 +223,7 @@ class function TSeq.From(const aDataset: TDataSet): TSeq<TDataSet, TDataSet>;
 begin
   Result.FFunc := Identity<TDataSet>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<TDataSet>)
+    procedure (const StopOn: TPredicate<TDataSet>)
     var
       D: TDataSet;
     begin
@@ -241,7 +241,7 @@ class function TSeq.Range(const aStart, aFinish: Integer): TSeq<Integer, Integer
 begin
   Result.FFunc := Identity<Integer>;
   Result.FIterate :=
-    procedure (StopOn: TPredicate<Integer>)
+    procedure (const StopOn: TPredicate<Integer>)
     var
       Item: Integer;
     begin

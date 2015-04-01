@@ -27,9 +27,9 @@ uses
   Functional.Value;
 
 type
-  TValueFunc<T, U> = reference to function (Item: TValue<T>): TValue<U>;
-  TIteratorProc<T> = reference to procedure (P: TPredicate<T>);
-  TFoldFunc<T, U> = reference to function (Item: T; Acc: U): U;
+  TValueFunc<T, U> = reference to function (const Item: TValue<T>): TValue<U>;
+  TIteratorProc<T> = reference to procedure (const P: TPredicate<T>);
+  TFoldFunc<T, U> = reference to function (const Item: T; const Acc: U): U;
 
   TFuncFactory<T, U> = record
   public
@@ -83,7 +83,7 @@ end;
 class function TFuncFactory<T, U>.Filter(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<U>
+    function (const Item: TValue<T>): TValue<U>
     begin
       Result := aOrigFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then
@@ -94,7 +94,7 @@ end;
 class function TFuncFactory<T, U>.Map<TResult>(const aOrigFunc: TValueFunc<T, U>; const aMapper: TFunc<U, TResult>): TValueFunc<T, TResult>;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<TResult>
+    function (const Item: TValue<T>): TValue<TResult>
     var
       R: TValue<U>;
     begin
@@ -111,7 +111,7 @@ var
   Counter: Integer;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<U>
+    function (const Item: TValue<T>): TValue<U>
     begin
       Result := aOrigFunc(Item);
       case Result.State of
@@ -131,7 +131,7 @@ var
   Skipping: Boolean;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<U>
+    function (const Item: TValue<T>): TValue<U>
     begin
       Result := aOrigFunc(Item);
 
@@ -156,7 +156,7 @@ var
   Counter: Integer;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<U>
+    function (const Item: TValue<T>): TValue<U>
     begin
       if Counter = aCount then
         begin
@@ -175,7 +175,7 @@ end;
 class function TFuncFactory<T, U>.TakeWhile(const aOrigFunc: TValueFunc<T, U>; const aPredicate: TPredicate<U>): TValueFunc<T, U>;
 begin
   Result :=
-    function (Item: TValue<T>): TValue<U>
+    function (const Item: TValue<T>): TValue<U>
     begin
       Result := aOrigFunc(Item);
       if Result.IsSomething and not aPredicate(Result.Value) then

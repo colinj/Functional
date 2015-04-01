@@ -23,11 +23,8 @@ object FrmDemo: TFrmDemo
     ActivePage = TabSheet1
     Align = alLeft
     TabOrder = 0
-    ExplicitHeight = 415
     object TabSheet1: TTabSheet
       Caption = 'TSequence'
-      ExplicitLeft = 5
-      ExplicitTop = 25
       object Button1: TButton
         Left = 32
         Top = 24
@@ -112,6 +109,9 @@ object FrmDemo: TFrmDemo
     object TabSheet5: TTabSheet
       Caption = 'DataSet'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 387
       object Button10: TButton
         Left = 24
@@ -141,8 +141,6 @@ object FrmDemo: TFrmDemo
     Align = alClient
     Caption = 'Panel1'
     TabOrder = 1
-    ExplicitWidth = 458
-    ExplicitHeight = 421
     object PageControl2: TPageControl
       AlignWithMargins = True
       Left = 4
@@ -152,12 +150,8 @@ object FrmDemo: TFrmDemo
       ActivePage = TabSheet3
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 450
-      ExplicitHeight = 374
       object TabSheet3: TTabSheet
         Caption = 'Log'
-        ExplicitWidth = 442
-        ExplicitHeight = 346
         object Memo1: TMemo
           Left = 0
           Top = 0
@@ -172,13 +166,13 @@ object FrmDemo: TFrmDemo
           ParentFont = False
           ScrollBars = ssVertical
           TabOrder = 0
-          ExplicitWidth = 442
-          ExplicitHeight = 346
         end
       end
       object TabSheet4: TTabSheet
         Caption = 'DataSet'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
         ExplicitWidth = 442
         ExplicitHeight = 346
         object DBGrid1: TDBGrid

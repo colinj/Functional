@@ -81,6 +81,7 @@ implementation
 uses
   Math,
   DateUtils,
+  StrUtils,
   Generics.Collections,
   Functional.Sequence,
   Functional.FuncFactory;
@@ -293,7 +294,7 @@ begin
 
   PrintHeader('Fold example - Sum items in an array.');
   SumInts :=
-    function(I: Integer; Accumulator: Integer): Integer
+    function(const I: Integer; const Accumulator: Integer): Integer
     begin
         Result := Accumulator + I;
     end;
@@ -306,11 +307,9 @@ begin
 
   PrintHeader('Fold example - Append items into a comma-separated string.');
   CommaSeparate :=
-    function(I: Integer; Accumulator: string): string
+    function(const I: Integer; const Accumulator: string): string
     begin
-      if Accumulator <> '' then
-        Accumulator := Accumulator + ',';
-      Result := Accumulator + IntToStr(I)
+      Result := Accumulator + IfThen(Accumulator = '', '', ',') + IntToStr(I)
     end;
 
   CsvRec := TSeq
@@ -456,7 +455,7 @@ begin
   Memo1.Lines.Add('-----------------');
 
   Total := EmpDS.Fold<TEmpSummary>(
-    function(D: TDataSet; Acc: TEmpSummary): TEmpSummary
+    function(const D: TDataSet; const Acc: TEmpSummary): TEmpSummary
     begin
       Result.Count := Acc.Count + 1;
       Result.Sum := Acc.Sum + D.FieldByName('Salary').AsFloat;
