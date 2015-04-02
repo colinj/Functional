@@ -129,7 +129,7 @@ end;
 
 procedure TFrmDemo.actDemo03AExecute(Sender: TObject);
 var
-  Seq: TSeq<Integer, Integer>;
+  Seq: TSeq<Integer>;
 begin
   PrintTitle('Demo 3A. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
 
@@ -168,7 +168,7 @@ end;
 
 procedure TFrmDemo.actDemo03BExecute(Sender: TObject);
 var
-  Seq: TSeq<Integer, Integer>;
+  Seq: TSeq<Integer>;
 begin
   PrintTitle('Demo 3B. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
 
@@ -189,7 +189,7 @@ end;
 
 procedure TFrmDemo.actDemo04Execute(Sender: TObject);
 var
-  Seq: TSeq<Integer, Integer>;
+  Seq: TSeq<Integer>;
 begin
   PrintTitle('Demo 4. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
 
@@ -216,7 +216,7 @@ end;
 
 procedure TFrmDemo.actDemo05Execute(Sender: TObject);
 var
-  Seq: TSeq<Integer, Integer>;
+  Seq: TSeq<Integer>;
 begin
   PrintTitle('Demo 5. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
 
@@ -238,7 +238,7 @@ end;
 
 procedure TFrmDemo.actDemo06Execute(Sender: TObject);
 var
-  Seq: TSeq<Integer, Integer>;
+  Seq: TSeq<Integer>;
   LessThan: TFunc<Integer, TPredicate<Integer>>;
 begin
   PrintTitle('Demo 6. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
@@ -434,7 +434,7 @@ type
 const
   ZERO_VAL: TEmpSummary = (Count: 0; Sum: 0);
 var
-  EmpDS: TSeq<TDataSet, TDataSet>;
+  EmpDS: TSeq<TDataSet>;
   Total: TEmpSummary;
   S: TList<string>;
   Item: string;

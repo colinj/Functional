@@ -49,15 +49,35 @@ type
     procedure ForEach(const aAction: TProc<U>);
   end;
 
+  TSeq<T> = record
+  private
+    FFunc: TValueFunc<T, T>;
+    FIterate: TIteratorProc<T>;
+  public
+    function Filter(const aPredicate: TPredicate<T>): TSeq<T>;
+    function Where(const aPredicate: TPredicate<T>): TSeq<T>; // synonym for Filter function
+    function Map(const aMapper: TFunc<T, T>): TSeq<T>; overload;
+    function Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>; overload;
+    function Select(const aMapper: TFunc<T, T>): TSeq<T>; overload; // synonum for Map function
+    function Select<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>; overload; // synonym for Map function
+    function Take(const aCount: Integer): TSeq<T>;
+    function Skip(const aCount: Integer): TSeq<T>;
+    function TakeWhile(const aPredicate: TPredicate<T>): TSeq<T>;
+    function SkipWhile(const aPredicate: TPredicate<T>): TSeq<T>;
+    function Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
+    function ToList: TList<T>;
+    procedure ForEach(const aAction: TProc<T>);
+  end;
+
   TSeq = record
   public
     class function Identity<T>(const Item: TValue<T>): TValue<T>; static;
-    class function From<T>(const aArray: TArray<T>): TSeq<T, T>; overload; static;
-    class function From<T>(const aEnumerable: TEnumerable<T>): TSeq<T, T>; overload; static;
-    class function From(const aString: string): TSeq<Char, Char>; overload; static;
-    class function From(const aStrings: TStrings): TSeq<string, string>; overload; static;
-    class function From(const aDataset: TDataSet): TSeq<TDataSet, TDataSet>; overload; static;
-    class function Range(const aStart, aFinish: Integer): TSeq<Integer, Integer>; static;
+    class function From<T>(const aArray: TArray<T>): TSeq<T>; overload; static;
+    class function From<T>(const aEnumerable: TEnumerable<T>): TSeq<T>; overload; static;
+    class function From(const aString: string): TSeq<Char>; overload; static;
+    class function From(const aStrings: TStrings): TSeq<string>; overload; static;
+    class function From(const aDataset: TDataSet): TSeq<TDataSet>; overload; static;
+    class function Range(const aStart, aFinish: Integer): TSeq<Integer>; static;
   end;
 
 implementation
@@ -160,6 +180,104 @@ begin
   Result := Accumulator;
 end;
 
+{ TSeq<T> }
+
+function TSeq<T>.Filter(const aPredicate: TPredicate<T>): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.Filter(FFunc, aPredicate);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.Where(const aPredicate: TPredicate<T>): TSeq<T>;
+begin
+  Result := Filter(aPredicate);
+end;
+
+function TSeq<T>.Map(const aMapper: TFunc<T, T>): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.Map<T>(FFunc, aMapper);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.Map<TResult>(FFunc, aMapper);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.Select(const aMapper: TFunc<T, T>): TSeq<T>;
+begin
+  Result := Map(aMapper);
+end;
+
+function TSeq<T>.Select<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
+begin
+  Result := Map<TResult>(aMapper);
+end;
+
+function TSeq<T>.Take(const aCount: Integer): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.Take(FFunc, aCount);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.TakeWhile(const aPredicate: TPredicate<T>): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.TakeWhile(FFunc, aPredicate);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.Skip(const aCount: Integer): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.Skip(FFunc, aCount);
+  Result.FIterate := FIterate;
+end;
+
+function TSeq<T>.SkipWhile(const aPredicate: TPredicate<T>): TSeq<T>;
+begin
+  Result.FFunc := TFuncFactory<T, T>.SkipWhile(FFunc, aPredicate);
+  Result.FIterate := FIterate;
+end;
+
+procedure TSeq<T>.ForEach(const aAction: TProc<T>);
+begin
+  FFunc(TValue<T>.Start);
+  FIterate(TFuncFactory<T, T>.ForEach(FFunc, aAction));
+end;
+
+function TSeq<T>.ToList: TList<T>;
+begin
+  Result := TList<T>.Create;
+  FIterate(TFuncFactory<T, T>.AddItem(FFunc, Result));
+end;
+
+function TSeq<T>.Fold<TResult>(const aFoldFunc: TFoldFunc<T, TResult>; const aInitVal: TResult): TResult;
+var
+  OrigFunc: TValueFunc<T, T>;
+  Accumulator: TResult;
+begin
+  OrigFunc := FFunc;
+
+  Accumulator := aInitVal;
+  OrigFunc(TValue<T>.Start);
+
+  FIterate(
+    function (const Item: T): Boolean
+    var
+      R: TValue<T>;
+    begin
+      Result := False;
+      R := OrigFunc(TValue<T>(Item));
+      case R.State of
+        vsSomething: Accumulator := aFoldFunc(R.Value, Accumulator);
+        vsFinish: Result := True;
+      end;
+    end
+  );
+
+  Result := Accumulator;
+end;
+
 { TSeq }
 
 class function TSeq.Identity<T>(const Item: TValue<T>): TValue<T>;
@@ -167,7 +285,7 @@ begin
   Result := Item;
 end;
 
-class function TSeq.From<T>(const aArray: TArray<T>): TSeq<T, T>;
+class function TSeq.From<T>(const aArray: TArray<T>): TSeq<T>;
 begin
   Result.FFunc := Identity<T>;
   Result.FIterate :=
@@ -180,7 +298,7 @@ begin
     end;
 end;
 
-class function TSeq.From<T>(const aEnumerable: TEnumerable<T>): TSeq<T, T>;
+class function TSeq.From<T>(const aEnumerable: TEnumerable<T>): TSeq<T>;
 begin
   Result.FFunc := Identity<T>;
   Result.FIterate :=
@@ -193,7 +311,7 @@ begin
     end;
 end;
 
-class function TSeq.From(const aString: string): TSeq<Char, Char>;
+class function TSeq.From(const aString: string): TSeq<Char>;
 begin
   Result.FFunc := Identity<Char>;
   Result.FIterate :=
@@ -206,7 +324,7 @@ begin
     end;
 end;
 
-class function TSeq.From(const aStrings: TStrings): TSeq<string, string>;
+class function TSeq.From(const aStrings: TStrings): TSeq<string>;
 begin
   Result.FFunc := Identity<string>;
   Result.FIterate :=
@@ -219,7 +337,7 @@ begin
     end;
 end;
 
-class function TSeq.From(const aDataset: TDataSet): TSeq<TDataSet, TDataSet>;
+class function TSeq.From(const aDataset: TDataSet): TSeq<TDataSet>;
 begin
   Result.FFunc := Identity<TDataSet>;
   Result.FIterate :=
@@ -237,7 +355,7 @@ begin
     end;
 end;
 
-class function TSeq.Range(const aStart, aFinish: Integer): TSeq<Integer, Integer>;
+class function TSeq.Range(const aStart, aFinish: Integer): TSeq<Integer>;
 begin
   Result.FFunc := Identity<Integer>;
   Result.FIterate :=
@@ -251,4 +369,3 @@ begin
 end;
 
 end.
-
