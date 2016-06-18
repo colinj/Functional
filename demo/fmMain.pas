@@ -335,25 +335,32 @@ const
   VOWELS = ['a','e','i','o','u','A','E','I','O','U'];
 var
   S: string;
+  PrintChar: TProc<Char>;
 begin
   S := 'Hello, World!';
+
+  PrintChar :=
+    procedure (C: Char)
+    begin
+      PrintStr('The character = ''%s''', [C])
+    end;
 
   PrintTitle(Format('Demo 8. string = ''%s''', [S]));
 
   PrintHeader('ForEach over a string value');
   TSeq.From(S)
-    .ForEach(procedure (C: Char) begin PrintStr('The character = ''%s''', [C]) end);
+    .ForEach(PrintChar);
 
   PrintHeader('Filter for vowels only');
   TSeq.From(S)
     .Filter(function (const C: Char): Boolean begin Result := CharInSet(C, VOWELS); end)
-    .ForEach(procedure (C: Char) begin PrintStr('The character = ''%s''', [C]) end);
+    .ForEach(PrintChar);
 
   PrintHeader('Filter for consonants and captalise');
   TSeq.From(S)
     .Filter(function (const C: Char): Boolean begin Result := CharInSet(C, ALPHA_CHARS) and not CharInSet(C, VOWELS); end)
     .Map<Char>(function (C: Char): Char begin Result := UpCase(C) end)
-    .ForEach(procedure (C: Char) begin PrintStr('The character = ''%s''', [C]) end);
+    .ForEach(PrintChar);
 
   PrintDone;
 end;
@@ -375,8 +382,12 @@ begin
 
     PrintHeader('Filter for strings starting with ''c''');
     TSeq.From(Animals)
-      .Filter(function (const S: string): Boolean begin Result := Copy(S, 1, 1) = 'c' end)
+      .Filter(function (const S: string): Boolean
+              begin
+                Result := Copy(S, 1, 1) = 'c'
+              end)
       .ForEach(PrintString);
+
   finally
     Animals.Free;
   end;
@@ -535,6 +546,7 @@ end;
 
 procedure TFrmDemo.Pause;
 begin
+  btnContinue.SetFocus;
   FCanContinue := False;
   while not FCanContinue do
     Application.ProcessMessages;

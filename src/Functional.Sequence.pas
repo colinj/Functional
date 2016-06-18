@@ -33,6 +33,7 @@ type
   private
     FFunc: TValueFunc<T, U>;
     FIterate: TIteratorProc<T>;
+    function CreateSeq(const aFunc: TValueFunc<T, U>): TSeq<T, U>;
   public
     function Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
     function Where(const aPredicate: TPredicate<U>): TSeq<T, U>; // synonym for Filter function
@@ -53,6 +54,7 @@ type
   private
     FFunc: TValueFunc<T, T>;
     FIterate: TIteratorProc<T>;
+    function CreateSeq(const aFunc: TValueFunc<T, T>): TSeq<T>;
   public
     function Filter(const aPredicate: TPredicate<T>): TSeq<T>;
     function Where(const aPredicate: TPredicate<T>): TSeq<T>; // synonym for Filter function
@@ -84,10 +86,15 @@ implementation
 
 { TSeq<T, U> }
 
+function TSeq<T, U>.CreateSeq(const aFunc: TValueFunc<T, U>): TSeq<T, U>;
+begin
+  Result.FFunc := aFunc;
+  Result.FIterate := FIterate;
+end;
+
 function TSeq<T, U>.Filter(const aPredicate: TPredicate<U>): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateFilter(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateFilter(FFunc, aPredicate));
 end;
 
 function TSeq<T, U>.Where(const aPredicate: TPredicate<U>): TSeq<T, U>;
@@ -97,8 +104,7 @@ end;
 
 function TSeq<T, U>.Map(const aMapper: TFunc<U, U>): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateMap<U>(FFunc, aMapper);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateMap<U>(FFunc, aMapper));
 end;
 
 function TSeq<T, U>.Map<TResult>(const aMapper: TFunc<U, TResult>): TSeq<T, TResult>;
@@ -119,26 +125,22 @@ end;
 
 function TSeq<T, U>.Take(const aCount: Integer): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateTake(FFunc, aCount);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateTake(FFunc, aCount));
 end;
 
 function TSeq<T, U>.TakeWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateTakeWhile(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateTakeWhile(FFunc, aPredicate));
 end;
 
 function TSeq<T, U>.Skip(const aCount: Integer): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateSkip(FFunc, aCount);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateSkip(FFunc, aCount));
 end;
 
 function TSeq<T, U>.SkipWhile(const aPredicate: TPredicate<U>): TSeq<T, U>;
 begin
-  Result.FFunc := TFuncFactory<T, U>.CreateSkipWhile(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, U>.CreateSkipWhile(FFunc, aPredicate));
 end;
 
 procedure TSeq<T, U>.ForEach(const aAction: TProc<U>);
@@ -182,10 +184,15 @@ end;
 
 { TSeq<T> }
 
+function TSeq<T>.CreateSeq(const aFunc: TValueFunc<T, T>): TSeq<T>;
+begin
+  Result.FFunc := aFunc;
+  Result.FIterate := FIterate;
+end;
+
 function TSeq<T>.Filter(const aPredicate: TPredicate<T>): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateFilter(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateFilter(FFunc, aPredicate));
 end;
 
 function TSeq<T>.Where(const aPredicate: TPredicate<T>): TSeq<T>;
@@ -195,8 +202,7 @@ end;
 
 function TSeq<T>.Map(const aMapper: TFunc<T, T>): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateMap<T>(FFunc, aMapper);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateMap<T>(FFunc, aMapper));
 end;
 
 function TSeq<T>.Map<TResult>(const aMapper: TFunc<T, TResult>): TSeq<T, TResult>;
@@ -217,26 +223,22 @@ end;
 
 function TSeq<T>.Take(const aCount: Integer): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateTake(FFunc, aCount);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateTake(FFunc, aCount));
 end;
 
 function TSeq<T>.TakeWhile(const aPredicate: TPredicate<T>): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateTakeWhile(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateTakeWhile(FFunc, aPredicate));
 end;
 
 function TSeq<T>.Skip(const aCount: Integer): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateSkip(FFunc, aCount);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateSkip(FFunc, aCount));
 end;
 
 function TSeq<T>.SkipWhile(const aPredicate: TPredicate<T>): TSeq<T>;
 begin
-  Result.FFunc := TFuncFactory<T, T>.CreateSkipWhile(FFunc, aPredicate);
-  Result.FIterate := FIterate;
+  Result := CreateSeq(TFuncFactory<T, T>.CreateSkipWhile(FFunc, aPredicate));
 end;
 
 procedure TSeq<T>.ForEach(const aAction: TProc<T>);
