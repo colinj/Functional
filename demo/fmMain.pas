@@ -43,6 +43,7 @@ type
     Button8: TButton;
     Button11: TButton;
     actDemo09: TAction;
+    btnContinue: TButton;
     procedure Button5Click(Sender: TObject);
     procedure btnDsLoopClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -56,10 +57,14 @@ type
     procedure actDemo07Execute(Sender: TObject);
     procedure actDemo08Execute(Sender: TObject);
     procedure actDemo09Execute(Sender: TObject);
+    procedure btnContinueClick(Sender: TObject);
   private
+    FCanContinue: Boolean;
+    procedure Pause;
     procedure PrintNum(X: Integer);
-    procedure PrintStr(S: string); overload;
-    procedure PrintStr(const aFormatStr: string; const Args: array of const); overload;
+    procedure PrintStr(S: string; const aPause: Boolean = True); overload;
+    procedure PrintStr(const aFormatStr: string; const Args: array of const; const aPause: Boolean = True); overload;
+    procedure PrintString(S: string);
     procedure PrintTitle(S: string);
     procedure PrintHeader(S: string);
     procedure PrintDone;
@@ -93,6 +98,7 @@ var
 
 procedure TFrmDemo.FormCreate(Sender: TObject);
 begin
+  FCanContinue := True;
   ClientDataSet1.FileName := 'data\employee.cds';
   ClientDataSet1.Open;
 
@@ -104,7 +110,8 @@ begin
   PrintTitle('Demo 1. Array of Integer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]');
   PrintHeader('ForEach PrintNum');
 
-  TSeq.From<Integer>(IntArray_1to10)
+  TSeq
+    .From<Integer>(IntArray_1to10)
     .ForEach(PrintNum);
 
   PrintDone;
@@ -151,7 +158,7 @@ begin
       begin
         Result := Format('Calculation: %d + 12 = %d', [I, I + 12]);
       end)
-    .ForEach(PrintStr);
+    .ForEach(PrintString);
 
   PrintDone;
 end;
@@ -182,7 +189,7 @@ begin
   PrintHeader('Select (add 12) returning a string');
   Seq
     .Select<string>(Add12String)
-    .ForEach(PrintStr);
+    .ForEach(PrintString);
 
   PrintDone;
 end;
@@ -306,6 +313,7 @@ begin
   PrintStr('Total = %d', [Total]);
 
   PrintHeader('Fold example - Append items into a comma-separated string.');
+
   CommaSeparate :=
     function(const I: Integer; const Accumulator: string): string
     begin
@@ -363,17 +371,22 @@ begin
 
     PrintHeader('ForEach over a TStrings object');
     TSeq.From(Animals)
-      .ForEach(PrintStr);
+      .ForEach(PrintString);
 
     PrintHeader('Filter for strings starting with ''c''');
     TSeq.From(Animals)
       .Filter(function (const S: string): Boolean begin Result := Copy(S, 1, 1) = 'c' end)
-      .ForEach(PrintStr);
+      .ForEach(PrintString);
   finally
     Animals.Free;
   end;
 
   PrintDone;
+end;
+
+procedure TFrmDemo.btnContinueClick(Sender: TObject);
+begin
+  FCanContinue := True;
 end;
 
 function BySalary(const D: TDataSet): Boolean;
@@ -383,8 +396,7 @@ end;
 
 function ToEmpRecord(D: TDataSet): TEmpDetail;
 begin
-  Result.Name := D.FieldByName('FirstName').AsString + ' ' +
-    D.FieldByName('LastName').AsString;
+  Result.Name := D.FieldByName('FirstName').AsString + ' ' + D.FieldByName('LastName').AsString;
   Result.Salary := D.FieldByName('Salary').AsFloat;
   Result.YearsOfService := YearsBetween(Now, D.FieldByName('HireDate').AsDateTime);
 end;
@@ -431,13 +443,16 @@ type
     Count: Integer;
     Sum: Double;
   end;
+
 const
   ZERO_VAL: TEmpSummary = (Count: 0; Sum: 0);
+
 var
   EmpDS: TSeq<TDataSet>;
   Total: TEmpSummary;
   S: TList<string>;
   Item: string;
+
 begin
   EmpDS := TSeq.From(ClientDataSet1)
     .Filter(function (const D: TDataSet): Boolean begin Result := D.FieldByName('Salary').AsCurrency < 20000 end);
@@ -480,14 +495,20 @@ begin
 
 end;
 
-procedure TFrmDemo.PrintStr(const aFormatStr: string; const Args: array of const);
+procedure TFrmDemo.PrintString(S: string);
 begin
-  PrintStr(Format(aFormatStr, Args));
+  PrintStr(S);
+end;
+procedure TFrmDemo.PrintStr(S: string; const aPause: Boolean = True);
+begin
+  if aPause then
+    Sleep(300);
+  Memo1.Lines.Add(S);
 end;
 
-procedure TFrmDemo.PrintStr(S: string);
+procedure TFrmDemo.PrintStr(const aFormatStr: string; const Args: array of const; const aPause: Boolean);
 begin
-  Memo1.Lines.Add(S);
+  PrintStr(Format(aFormatStr, Args), aPause);
 end;
 
 procedure TFrmDemo.PrintNum(X: Integer);
@@ -498,23 +519,32 @@ end;
 procedure TFrmDemo.PrintTitle(S: string);
 begin
   Memo1.Clear;
-  PrintStr(S);
-  PrintStr(StringOfChar('=', Max(39, Length(S)) + 1));
+  Application.ProcessMessages;
+  PrintStr(S, False);
+  PrintStr(StringOfChar('=', Max(39, Length(S)) + 1), False);
 end;
 
 procedure TFrmDemo.PrintHeader(S: string);
 begin
-  PrintStr('');
-  PrintStr(StringOfChar('-', Length(S) + 1));
-  PrintStr(S);
-  PrintStr(StringOfChar('-', Length(S) + 1));
+  PrintStr('', False);
+  PrintStr(StringOfChar('-', Length(S) + 1), False);
+  PrintStr(S, False);
+  PrintStr(StringOfChar('-', Length(S) + 1), False);
+  Pause;
+end;
+
+procedure TFrmDemo.Pause;
+begin
+  FCanContinue := False;
+  while not FCanContinue do
+    Application.ProcessMessages;
 end;
 
 procedure TFrmDemo.PrintDone;
 begin
-  PrintStr('');
-  PrintStr(StringOfChar('=', 40));
-  PrintStr('Done!');
+  PrintStr('', False);
+  PrintStr(StringOfChar('=', 40), False);
+  PrintStr('Done!', False);
 end;
 
 end.

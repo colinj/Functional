@@ -36,7 +36,7 @@ type
     class function Nothing: TValue<T>; static;
     class function Start: TValue<T>; static;
     class function Finish: TValue<T>; static;
-    function IsSomething: Boolean;
+    function HasValue: Boolean;
     procedure SetState(const aState: TValueState);
     property Value: T read FValue;
     property State: TValueState read FState;
@@ -52,7 +52,7 @@ begin
   Result.FState := vsSomething;
 end;
 
-function TValue<T>.IsSomething: Boolean;
+function TValue<T>.HasValue: Boolean;
 begin
   Result := FState = vsSomething;
 end;

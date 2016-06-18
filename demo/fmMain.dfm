@@ -105,14 +105,19 @@ object FrmDemo: TFrmDemo
         Action = actDemo09
         TabOrder = 9
       end
+      object btnContinue: TButton
+        Left = 32
+        Top = 391
+        Width = 120
+        Height = 25
+        Caption = 'Continue'
+        TabOrder = 10
+        OnClick = btnContinueClick
+      end
     end
     object TabSheet5: TTabSheet
       Caption = 'DataSet'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 387
       object Button10: TButton
         Left = 24
         Top = 20
@@ -171,10 +176,6 @@ object FrmDemo: TFrmDemo
       object TabSheet4: TTabSheet
         Caption = 'DataSet'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 442
-        ExplicitHeight = 346
         object DBGrid1: TDBGrid
           Left = 0
           Top = 0
